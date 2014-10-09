@@ -1,2 +1,12 @@
-arandr
+git
+xorg
+slim
+openbox
+firefox
+phpmyadmin
 geany
+openssh-server
+openssh-client
+openjdk-7-jre
+nautilus
+smartgithg
