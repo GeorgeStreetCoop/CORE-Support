@@ -8,3 +8,5 @@ mkdir /CORE-Support/
 cd /CORE-Support/
 git clone https://github.com/GeorgeStreetCoop/CORE-Support.git /CORE-Support/
 chown -Rf coop /CORE-Support
+
+. ./apt-updates.sh
