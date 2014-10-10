@@ -58,12 +58,12 @@ ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/html/POS"
 # set up browser (runs as user "coop")
 su coop
 xdg-settings set default-web-browser firefox.desktop
-sed -i 's/"browser.startup.homepage"//' ~coop/.mozilla/firefox/*/prefs.js
+sed -i '/"browser.startup.homepage"/d' ~coop/.mozilla/firefox/*/prefs.js
 sed -i '$a user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' ~coop/.mozilla/firefox/*/prefs.js
 
 # set up bash aliases
 touch ~coop/.bashrc
-sed -i 's/alias firefox=.+//;s/alias geany=.+//;s/alias smartgit=.+//' ~coop/.bashrc
+sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d' ~coop/.bashrc
 sed -i '$a alias firefox="firefox >/dev/null 2>&1 &"' ~coop/.bashrc
 sed -i '$a alias geany="geany >/dev/null 2>&1 &"' ~coop/.bashrc
 sed -i '$a alias smartgit="smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
@@ -71,7 +71,7 @@ sed -i '$a alias smartgit="smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
 #set up openbox autolaunch
 mkdir -p ~coop/.config/openbox
 touch ~coop/.config/openbox/autostart
-sed -i 's/^xterm.+//;s/^firefox.+//;s/^geany.+//;s/^smartgit.+//' ~coop/.config/openbox/autostart
+sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d' ~coop/.config/openbox/autostart
 sed -i '$a xterm >/dev/null 2>&1 &' ~coop/.config/openbox/autostart
 sed -i '$a firefox >/dev/null 2>&1 &' ~coop/.config/openbox/autostart
 sed -i '$a geany >/dev/null 2>&1 &' ~coop/.config/openbox/autostart
