@@ -40,9 +40,9 @@ git clone https://github.com/CORE-POS/IS4C.git "$COREPOS"
 chown -Rf coop "$COREPOS"
 
 # set up our ini files
-cp "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
-cp "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
-chown www-data "$COREPOS/pos/is4c-nf/ini.php" "$COREPOS/pos/is4c-nf/ini-local.php"
+ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
+ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
+chown www-data "$SUPPORT/ini.php" "$SUPPORT/ini-local.php"
 
 # set up error logs
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
