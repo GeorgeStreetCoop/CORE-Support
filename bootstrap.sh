@@ -47,3 +47,14 @@ chown www-data "$COREPOS/pos/is4c-nf/ini.php" "$COREPOS/pos/is4c-nf/ini-local.ph
 # set up error logs
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
 chown www-data "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
+
+
+# set up webserver
+ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/html/POS"
+
+
+# set up browser (runs as user "coop")
+su coop
+xdg-settings set default-web-browser firefox.desktop
+sed -i 's/"browser.startup.homepage"//' ~coop/.mozilla/firefox/*/prefs.js
+sed -i '$a user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' ~coop/.mozilla/firefox/*/prefs.js
