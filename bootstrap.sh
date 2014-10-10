@@ -68,7 +68,7 @@ sed -i '$a alias firefox="firefox >/dev/null 2>&1 &"' ~coop/.bashrc
 sed -i '$a alias geany="geany >/dev/null 2>&1 &"' ~coop/.bashrc
 sed -i '$a alias smartgit="smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
 
-#set up openbox autolaunch
+# set up openbox autolaunch
 mkdir -p ~coop/.config/openbox
 touch ~coop/.config/openbox/autostart
 sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d' ~coop/.config/openbox/autostart
