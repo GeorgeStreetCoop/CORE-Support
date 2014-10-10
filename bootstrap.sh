@@ -41,6 +41,7 @@ chown -Rf coop "$COREPOS"
 
 # set up our ini files
 ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
+ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 chown www-data "$SUPPORT/ini.php" "$SUPPORT/ini-local.php"
 chown www-data "$COREPOS/pos/is4c-nf/ini.php" "$COREPOS/pos/is4c-nf/ini-local.php"
@@ -59,3 +60,10 @@ su coop
 xdg-settings set default-web-browser firefox.desktop
 sed -i 's/"browser.startup.homepage"//' ~coop/.mozilla/firefox/*/prefs.js
 sed -i '$a user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' ~coop/.mozilla/firefox/*/prefs.js
+
+# set up bash aliases
+touch ~coop/.bashrc
+sed -i 's/alias firefox=.+//;s/alias geany=.+//;s/alias smartgit=.+//' ~coop/.bashrc
+sed -i '$a alias firefox="firefox >/dev/null 2>&1 &"' ~coop/.bashrc
+sed -i '$a alias geany="geany >/dev/null 2>&1 &"' ~coop/.bashrc
+sed -i '$a alias smartgit="smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
