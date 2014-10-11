@@ -59,6 +59,21 @@ sed -i 's/.*GRUB_INIT_TUNE=.*/GRUB_INIT_TUNE="480 440 1 660 1 880 1 660 1 440 3"
 update-grub
 
 
+# set up fannie and lane hosts
+sed -i '/192.168.1.50/d' /etc/hosts
+sed -i '/192.168.1.51/d' /etc/hosts
+sed -i '/192.168.1.52/d' /etc/hosts
+sed -i '/192.168.1.53/d' /etc/hosts
+sed -i '/fannie/d' /etc/hosts
+sed -i '/lane1/d' /etc/hosts
+sed -i '/lane2/d' /etc/hosts
+sed -i '/lane3/d' /etc/hosts
+sed -i '$a 192.168.1.50    fannie' /etc/hosts
+sed -i '$a 192.168.1.51    lane1' /etc/hosts
+sed -i '$a 192.168.1.52    lane2' /etc/hosts
+sed -i '$a 192.168.1.53    lane3' /etc/hosts
+
+
 # set up webserver
 rm -f "/var/www/html/POS"
 ln -svf "$COREPOS/pos/is4c-nf" "/var/www/html/POS"
