@@ -60,14 +60,14 @@ update-grub
 
 
 # set up fannie and lane hosts
-sed -i '/192.168.1.50/d' /etc/hosts
-sed -i '/192.168.1.51/d' /etc/hosts
-sed -i '/192.168.1.52/d' /etc/hosts
-sed -i '/192.168.1.53/d' /etc/hosts
-sed -i '/fannie/d' /etc/hosts
-sed -i '/lane1/d' /etc/hosts
-sed -i '/lane2/d' /etc/hosts
-sed -i '/lane3/d' /etc/hosts
+sed -i '/^192.168.1.50\b/d' /etc/hosts
+sed -i '/^192.168.1.51\b/d' /etc/hosts
+sed -i '/^192.168.1.52\b/d' /etc/hosts
+sed -i '/^192.168.1.53\b/d' /etc/hosts
+sed -i '/\bfannie\b/d' /etc/hosts
+sed -i '/\blane1\b/d' /etc/hosts
+sed -i '/\blane2\b/d' /etc/hosts
+sed -i '/\blane3\b/d' /etc/hosts
 sed -i '$a 192.168.1.50    fannie' /etc/hosts
 sed -i '$a 192.168.1.51    lane1' /etc/hosts
 sed -i '$a 192.168.1.52    lane2' /etc/hosts
