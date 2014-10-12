@@ -5,6 +5,7 @@
 COREPOS=/CORE-POS
 SUPPORT=/CORE-Support
 LANEIDFILE=$SUPPORT/laneid.txt
+THISIP=`ifconfig eth0|sed -n '/inet addr/s/^.*inet addr:\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\).*$/\1/p'`
 
 # bootstrap git
 apt-get install git
@@ -77,6 +78,11 @@ sed -i '$a 192.168.1.53    lane3' /etc/hosts
 # set up webserver
 rm -f "/var/www/html/POS"
 ln -svf "$COREPOS/pos/is4c-nf" "/var/www/html/POS"
+
+
+# set up mysql for network use
+sed -i "/bind-address/s/\(= *\).*\$/\1${THISIP}/" my.cnf
+sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' my.cnf
 
 
 # set up browser (runs as user "coop")
