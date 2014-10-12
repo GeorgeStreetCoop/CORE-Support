@@ -81,8 +81,8 @@ ln -svf "$COREPOS/pos/is4c-nf" "/var/www/html/POS"
 
 
 # set up mysql for network use
-sed -i "/bind-address/s/\(= *\).*\$/\1${THISIP}/" my.cnf
-sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' my.cnf
+sed -i "/bind-address/s/\(= *\).*\$/\1${THISIP}/" /etc/mysql/my.cnf
+sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 
 # set up browser (runs as user "coop")
