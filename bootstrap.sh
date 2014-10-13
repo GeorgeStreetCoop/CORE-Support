@@ -91,4 +91,4 @@ sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 
 # set up user "coop" (runs as that user ID)
-su -c './setup_user.sh' - coop
+su -c "$SUPPORT/setup_user.sh" - coop
