@@ -28,6 +28,24 @@ ON core_translog.*
 TO pos@localhost;
 
 
+DROP USER fannie@'192.168.1.%';
+
+CREATE USER fannie@'192.168.1.%'
+IDENTIFIED BY PASSWORD '*C06C1B8C66BB23C8EA3CB31321B656F0CE43ECE8';
+
+GRANT ALL PRIVILEGES
+ON core_opdata.*
+TO fannie@'192.168.1.%';
+
+GRANT ALL PRIVILEGES
+ON core_server.*
+TO fannie@'192.168.1.%';
+
+GRANT ALL PRIVILEGES
+ON core_translog.*
+TO fannie@'192.168.1.%';
+
+
 USE core_translog;
 
 
