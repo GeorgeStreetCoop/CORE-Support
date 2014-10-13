@@ -93,9 +93,9 @@ sed -i '$a user_pref("browser.startup.homepage", "http://localhost/POS/install/i
 # set up bash aliases
 touch ~coop/.bashrc
 sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d' ~coop/.bashrc
-sed -i '$a alias firefox="firefox >/dev/null 2>&1 &"' ~coop/.bashrc
-sed -i '$a alias geany="geany >/dev/null 2>&1 &"' ~coop/.bashrc
-sed -i '$a alias smartgit="smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
+sed -i '$a alias firefox="nohup firefox >/dev/null 2>&1 &"' ~coop/.bashrc
+sed -i '$a alias geany="nohup geany >/dev/null 2>&1 &"' ~coop/.bashrc
+sed -i '$a alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' ~coop/.bashrc
 
 # set up openbox autolaunch
 mkdir -p ~coop/.config/openbox
