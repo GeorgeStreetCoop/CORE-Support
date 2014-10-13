@@ -90,24 +90,5 @@ sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
 sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 
-# set up browser (runs as user "coop")
-su coop
-xdg-settings set default-web-browser firefox.desktop
-sed -i '/"browser.startup.homepage"/d' ~coop/.mozilla/firefox/*/prefs.js
-echo 'user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' >> ~coop/.mozilla/firefox/*/prefs.js
-
-# set up bash aliases
-touch ~coop/.bashrc
-sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d' >> ~coop/.bashrc
-echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~coop/.bashrc
-echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~coop/.bashrc
-echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~coop/.bashrc
-
-# set up openbox autolaunch
-mkdir -p ~coop/.config/openbox
-touch ~coop/.config/openbox/autostart
-sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d' ~coop/.config/openbox/autostart
-echo 'xterm >/dev/null 2>&1 &' >> ~coop/.config/openbox/autostart
-echo 'firefox >/dev/null 2>&1 &' >> ~coop/.config/openbox/autostart
-echo 'geany >/dev/null 2>&1 &' >> ~coop/.config/openbox/autostart
-echo 'smartgithg >/dev/null 2>&1 &' >> ~coop/.config/openbox/autostart
+# set up user "coop" (runs as that user ID)
+su -c './setup_user.sh' - coop
