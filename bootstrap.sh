@@ -22,6 +22,8 @@ tasksel install lamp-server
 
 # bootstrap git
 apt-get install git
+# bootstrap adding apt repositories
+apt-get install software-properties-common
 
 # get latest Support directory
 rm -rf "$SUPPORT"
