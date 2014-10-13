@@ -16,6 +16,10 @@ LANEIP="192.168.1.$((${LANENUMBER}+50))"
 echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
 
 
+# install LAMP stack
+tasksel install lamp-server
+
+
 # bootstrap git
 apt-get install git
 
