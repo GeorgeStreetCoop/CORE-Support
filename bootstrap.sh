@@ -15,6 +15,11 @@ fi
 LANEIP="192.168.1.$((${LANENUMBER}+50))"
 echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
 
+# get password for mysql 'pos' user
+while [ -z "$POSPASSWORD" ]; do
+	read -s -p "What is the password for the mysql 'pos' user? " POSPASSWORD
+done
+
 
 # install LAMP stack
 tasksel install lamp-server
@@ -47,7 +52,7 @@ chown -Rf coop "$COREPOS"
 ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 # ini-local.php is linked to a copy, so local changes don't automatically share
-cp "$SUPPORT/ini-local.blank.php" "$SUPPORT/ini-local.php"
+sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###POSPASSWORD###/${POSPASSWORD}/g" "$SUPPORT/template.ini-local.php" > "$SUPPORT/ini-local.php"
 ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 chown www-data "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 
@@ -91,8 +96,13 @@ sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
 sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 # set up mysql users and basic data
+echo 'When prompted below, please enter your mysql ROOT password...'
 mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
 
 
 # set up user "coop" (runs as that user ID)
 su -c "$SUPPORT/setup_user.sh" - coop
+
+
+# cleanup environment
+unset POSPASSWORD
