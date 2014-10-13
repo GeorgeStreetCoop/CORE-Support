@@ -1,10 +1,15 @@
 #~/bin/sh
 # run this script as regular user!
 
+# set up variables
+if [ -z "$SUPPORT" ]; then
+	SUPPORT=/CORE-Support
+fi
+
 # set up bash aliases
 touch ~/.bashrc
 sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d' >> ~/.bashrc
-echo 'alias ffirefoxf="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
+echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
 
@@ -16,6 +21,9 @@ echo 'xterm >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'firefox >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'geany >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'smartgithg >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
+
+# set up git credentials
+cp "$SUPPORT/template.gitconfig" ~/.gitconfig
 
 # set up browser
 /usr/bin/firefox -setDefaultBrowser 2>/dev/null &
