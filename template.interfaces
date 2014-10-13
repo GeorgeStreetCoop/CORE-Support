@@ -14,6 +14,6 @@ iface eth0 inet static
 	broadcast 192.168.1.255
 	gateway 192.168.1.1
 	dns-nameservers 167.206.245.135
-	dns-nameservers 167.206.245.136
+	dns-nameservers 129.250.35.250
 	dns-nameservers 8.8.8.8
 	dns-nameservers 8.8.4.4
