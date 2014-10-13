@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # run this script under sudo!
 
 # set up variables
