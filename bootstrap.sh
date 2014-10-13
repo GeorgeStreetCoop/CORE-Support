@@ -4,8 +4,17 @@
 # set up variables
 COREPOS=/CORE-POS
 SUPPORT=/CORE-Support
-LANEIDFILE=$SUPPORT/laneid.txt
-THISIP=`ifconfig eth0|sed -n '/inet addr/s/^.*inet addr:\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\).*$/\1/p'`
+
+# determine lane number and IP address
+LANEID=`hostname`
+LANENUMBER=`echo ${LANEID}|sed -n 's/^lane\([0-9]*\)$/\1/p'`
+if [ -z "$LANENUMBER" ]; then
+	echo "Host '${LANEID}' does not appear to be a POS lane. Aborting lane install." >&2
+	exit 2
+fi
+LANEIP="192.168.1.$((${LANENUMBER}+50))"
+echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
+
 
 # bootstrap git
 apt-get install git
@@ -19,19 +28,6 @@ chown -Rf coop "$SUPPORT"
 
 # install needed packages
 . ./apt-updates.sh
-
-# get/set lane ID
-if [ -f "$LANEIDFILE" ]; then
-	LANEID=`cat "$LANEIDFILE"`
-fi
-if [ -z "$LANEID" ]; then
-	while [ -z "$LANEID" ]; do
-		read -p "What is the name of this POS lane? (lane1, lane2, etc) " LANEID
-	done
-	echo -n "$LANEID" > "$LANEIDFILE"
-fi
-echo "Lane ID is $LANEID, stored at $LANEIDFILE"
-ls -l "$LANEIDFILE"
 
 # get latest POS directory
 rm -rf "$COREPOS"
@@ -60,6 +56,9 @@ sed -i 's/.*GRUB_INIT_TUNE=.*/GRUB_INIT_TUNE="480 440 1 660 1 880 1 660 1 440 3"
 update-grub
 
 
+# set up static IP
+sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
+
 # set up fannie and lane hosts
 sed -i '/^192.168.1.50\b/d' /etc/hosts
 sed -i '/^192.168.1.51\b/d' /etc/hosts
@@ -81,7 +80,7 @@ ln -svf "$COREPOS/pos/is4c-nf" "/var/www/html/POS"
 
 
 # set up mysql for network use
-sed -i "/bind-address/s/\(= *\).*\$/\1${THISIP}/" /etc/mysql/my.cnf
+sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
 sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 
