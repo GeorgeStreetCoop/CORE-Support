@@ -90,6 +90,9 @@ ln -svf "$COREPOS/pos/is4c-nf" "/var/www/html/POS"
 sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
 sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
+# set up mysql users and basic data
+mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
+
 
 # set up user "coop" (runs as that user ID)
 su -c "$SUPPORT/setup_user.sh" - coop

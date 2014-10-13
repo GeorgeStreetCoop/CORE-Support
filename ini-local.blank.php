@@ -43,13 +43,13 @@ Data Connection Settings
 $CORE_LOCAL->set('mDBMS','pdomysql', True);
 				// Options: mssql, mysql, pgsql
 $CORE_LOCAL->set('mServer','localhost', True);
-$CORE_LOCAL->set('mUser','', True);
+$CORE_LOCAL->set('mUser','pos', True);
 $CORE_LOCAL->set('mPass','', True);
 $CORE_LOCAL->set('mDatabase','core_server', True);
 
 $CORE_LOCAL->set('DBMS','pdomysql', True);
 $CORE_LOCAL->set('localhost','localhost', True);
-$CORE_LOCAL->set('localUser','', True);
+$CORE_LOCAL->set('localUser','pos', True);
 $CORE_LOCAL->set('localPass','', True);
 $CORE_LOCAL->set('tDatabase','core_translog', True);
 $CORE_LOCAL->set('pDatabase','core_opdata', True);
