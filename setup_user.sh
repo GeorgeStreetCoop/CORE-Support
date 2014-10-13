@@ -18,9 +18,8 @@ echo 'geany >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'smartgithg >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 
 # set up browser
-xdg-settings set default-web-browser firefox.desktop
-/usr/bin/firefox -setDefaultBrowser 2>/dev/null
-sleep 5
+/usr/bin/firefox -setDefaultBrowser 2>/dev/null &
+sleep 10
 kill `pidof firefox`
 sed -i '/"browser.startup.homepage"/d' ~/.mozilla/firefox/*/prefs.js
 echo 'user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' >> ~/.mozilla/firefox/*/prefs.js
