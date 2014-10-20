@@ -100,6 +100,10 @@ echo 'When prompted below, please enter your mysql ROOT password...'
 mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
 
 
+# set up ssd, including boot process
+. "$SUPPORT/setup_ssd.sh"
+
+
 # set up user "coop" (runs as that user ID)
 su -c "$SUPPORT/setup_user.sh" - coop
 
