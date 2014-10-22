@@ -96,4 +96,12 @@ $CORE_LOCAL->set('VoidLimit',0, True);
 $CORE_LOCAL->set('Debug_CoreLocal',0, True);
 $CORE_LOCAL->set('Debug_Redirects',0, True);
 
+$CORE_LOCAL->set('receiptHeaderCount', 6);
+$CORE_LOCAL->set('receiptHeader1', 'George Street Co-op');
+$CORE_LOCAL->set('receiptHeader2', 'natural foods market & cafe');
+$CORE_LOCAL->set('receiptHeader3', '89 Morris Street');
+$CORE_LOCAL->set('receiptHeader4', 'New Brunswick, NJ 08901');
+$CORE_LOCAL->set('receiptHeader5', '732-247-8280');
+$CORE_LOCAL->set('receiptHeader6', 'www.georgestreetcoop.com');
+
 @include_once(dirname(__FILE__).'/ini-local.php');
