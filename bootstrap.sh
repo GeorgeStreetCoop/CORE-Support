@@ -101,7 +101,7 @@ mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
 
 
 # set up ssd, including boot process
-. "$SUPPORT/setup_ssd.sh"
+. "$SUPPORT/setup_serial.sh"
 
 
 # set up user "coop" (runs as that user ID)
