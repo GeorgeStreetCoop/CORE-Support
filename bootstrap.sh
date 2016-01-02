@@ -44,7 +44,7 @@ chown -Rf coop "$SUPPORT"
 rm -rf "$COREPOS"
 mkdir "$COREPOS"
 cd "$COREPOS"
-git clone https://github.com/CORE-POS/IS4C.git "$COREPOS"
+git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
 chown -Rf coop "$COREPOS"
 
 # set up our ini files:
