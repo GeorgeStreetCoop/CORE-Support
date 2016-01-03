@@ -16,8 +16,8 @@ LANEIP="192.168.1.$((${LANENUMBER}+50))"
 echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
 
 # get password for mysql 'pos' user
-while [ -z "$POSPASSWORD" ]; do
-	read -s -p "What is the password for the mysql 'pos' user? " POSPASSWORD
+while [ -z "$LANEPASSWORD" ]; do
+	read -s -p "What is the password for the mysql 'lane' user? " LANEPASSWORD
 done
 
 
@@ -52,7 +52,7 @@ chown -Rf cashier "$COREPOS"
 ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 # ini-local.php is linked to a copy, so local changes don't automatically share
-sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###POSPASSWORD###/${POSPASSWORD}/g" "$SUPPORT/template.ini-local.php" > "$SUPPORT/ini-local.php"
+sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini-local.php" > "$SUPPORT/ini-local.php"
 ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 chown www-data "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 
@@ -110,4 +110,4 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 
 
 # cleanup environment
-unset POSPASSWORD
+unset LANEPASSWORD
