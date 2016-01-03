@@ -2,6 +2,7 @@ CREATE DATABASE IF NOT EXISTS core_opdata;
 CREATE DATABASE IF NOT EXISTS core_server;
 CREATE DATABASE IF NOT EXISTS core_translog;
 
+
 DROP USER pos@localhost;
 
 CREATE USER pos@localhost
