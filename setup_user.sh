@@ -28,6 +28,6 @@ cp "$SUPPORT/template.gitconfig" ~/.gitconfig
 # set up browser
 /usr/bin/firefox -setDefaultBrowser 2>/dev/null &
 sleep 10
-kill `pidof firefox`
+kill `pidof firefox` 2>/dev/null
 sed -i '/"browser.startup.homepage"/d' ~/.mozilla/firefox/*/prefs.js
 echo 'user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' >> ~/.mozilla/firefox/*/prefs.js
