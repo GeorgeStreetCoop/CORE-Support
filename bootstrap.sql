@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS taxrates (
  	rate float DEFAULT NULL,
  	description varchar(50) DEFAULT NULL,
 PRIMARY KEY (id)
-)
+);
 
 TRUNCATE TABLE taxrates;
 
