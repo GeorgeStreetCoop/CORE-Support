@@ -35,7 +35,7 @@ rm -rf "$SUPPORT"
 mkdir "$SUPPORT"
 cd "$SUPPORT"
 git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
-chown -Rf coop "$SUPPORT"
+chown -Rf cashier "$SUPPORT"
 
 # install needed packages
 . ./apt-updates.sh
@@ -45,7 +45,7 @@ rm -rf "$COREPOS"
 mkdir "$COREPOS"
 cd "$COREPOS"
 git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
-chown -Rf coop "$COREPOS"
+chown -Rf cashier "$COREPOS"
 
 # set up our ini files:
 # ini.php is linked, so changes reflect back up to the shared codebase
