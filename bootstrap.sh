@@ -55,6 +55,9 @@ chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini-local.php" > "$SUPPORT/ini-local.php"
 ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 chown www-data "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
+# ini.json is simply created empty; for the moment, this file doesn't sync
+touch "$COREPOS/pos/is4c-nf/ini.json"
+chown www-data "$COREPOS/pos/is4c-nf/ini.json"
 
 # set up error logs
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
