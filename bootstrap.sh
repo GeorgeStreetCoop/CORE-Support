@@ -69,7 +69,8 @@ update-grub
 
 
 # set up static IP
-sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
+# 2016-01-02: commented out as seems to break networking entirely; reserved DHCP is sufficient.
+# sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
 
 # set up fannie and lane hosts
 sed -i '/^192.168.1.50\b/d' /etc/hosts
