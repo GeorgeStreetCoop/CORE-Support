@@ -54,6 +54,13 @@ TO fannie@'192.168.1.%';
 USE core_translog;
 
 
+CREATE TABLE IF NOT EXISTS taxrates (
+	id int(11) NOT NULL DEFAULT 0,
+ 	rate float DEFAULT NULL,
+ 	description varchar(50) DEFAULT NULL,
+PRIMARY KEY (id)
+)
+
 TRUNCATE TABLE taxrates;
 
 INSERT taxrates ( id, rate, description )
