@@ -105,8 +105,8 @@ mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
 . "$SUPPORT/setup_serial.sh"
 
 
-# set up user "coop" (runs as that user ID)
-su -c "$SUPPORT/setup_user.sh" - coop
+# set up user "cashier" (runs as that user ID)
+su -c "$SUPPORT/setup_user.sh" - cashier
 
 
 # cleanup environment
