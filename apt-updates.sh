@@ -4,5 +4,4 @@ do
 	sudo add-apt-repository -y $REPO
 done
 sudo apt-get -qq update
-sudo apt-get install `cat packages.txt`
-
+sudo apt-get --yes install `cat packages.txt`
