@@ -112,5 +112,10 @@ mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
 su -c "$SUPPORT/setup_user.sh" - cashier
 
 
+# set background image to Co-op logo
+ln -svf "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+
+
 # cleanup environment
 unset LANEPASSWORD
