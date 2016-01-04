@@ -10,3 +10,7 @@ openssh-client
 openjdk-7-jre
 nautilus
 smartgithg
+unetbootin
+usbmount
+unzip
+p7z-full
