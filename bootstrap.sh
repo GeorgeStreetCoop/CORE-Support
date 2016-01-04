@@ -43,7 +43,8 @@ fi
 chown -Rf cashier "$SUPPORT"
 
 # install needed packages
-. ./apt-updates.sh
+. "$SUPPORT/setup_packages.sh"
+
 
 # get latest CORE-POS directory; if user specified "rm" argument, deletes old one
 if [ -n "$1" -a "$1" = "rm" ]; then
@@ -89,7 +90,7 @@ ln -svf "$COREPOS/pos/is4c-nf" "/var/www/lane"
 
 # set up mysql users and basic data
 echo 'When prompted below, please enter your mysql ROOT password...'
-mysql -u root -p --force < "$SUPPORT/bootstrap.sql"
+mysql -u root -p --force < "$SUPPORT/setup_db.sql"
 
 
 # set up ssd, including boot process
