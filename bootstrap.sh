@@ -82,32 +82,13 @@ sed -i 's/.*GRUB_INIT_TUNE=.*/GRUB_INIT_TUNE="480 440 1 660 1 880 1 660 1 440 3"
 update-grub
 
 
-# set up static IP
-# 2016-01-02: commented out as seems to break networking entirely; reserved DHCP is sufficient.
-# sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
-
-# set up fannie and lane hosts
-sed -i '/^192.168.1.50\b/d' /etc/hosts
-sed -i '/^192.168.1.51\b/d' /etc/hosts
-sed -i '/^192.168.1.52\b/d' /etc/hosts
-sed -i '/^192.168.1.53\b/d' /etc/hosts
-sed -i '/\bfannie\b/d' /etc/hosts
-sed -i '/\blane1\b/d' /etc/hosts
-sed -i '/\blane2\b/d' /etc/hosts
-sed -i '/\blane3\b/d' /etc/hosts
-sed -i '$a 192.168.1.50    fannie' /etc/hosts
-sed -i '$a 192.168.1.51    lane1' /etc/hosts
-sed -i '$a 192.168.1.52    lane2' /etc/hosts
-sed -i '$a 192.168.1.53    lane3' /etc/hosts
+# set up network
+. "$SUPPORT/setup_network.sh"
 
 
-# set up webserver
+# set up lane URL
 ln -svf "$COREPOS/pos/is4c-nf" "/var/www/lane"
 
-
-# set up mysql for network use
-sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
-sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
 
 # set up mysql users and basic data
 echo 'When prompted below, please enter your mysql ROOT password...'
