@@ -39,7 +39,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 else
 	cd "$SUPPORT"
-	git pull
+	git reset --hard HEAD
 fi
 chown -Rf cashier "$SUPPORT"
 
@@ -54,7 +54,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
 else
 	cd "$COREPOS"
-	git pull
+	git reset --hard HEAD
 fi
 chown -Rf cashier "$COREPOS"
 
