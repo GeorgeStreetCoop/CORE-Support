@@ -2,6 +2,7 @@
 # run this script under sudo!
 
 # set up variables
+PREVIOUSDIR=`pwd`
 COREPOS=/CORE-POS
 SUPPORT=/CORE-Support
 
@@ -122,3 +123,4 @@ chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf
 
 # cleanup environment
 unset LANEPASSWORD
+cd "$PREVIOUSDIR"
