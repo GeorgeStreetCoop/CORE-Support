@@ -91,7 +91,7 @@ sed -i '$a 192.168.1.53    lane3' /etc/hosts
 
 
 # set up webserver
-ln -svfh "$COREPOS/pos/is4c-nf" "/var/www/POS"
+ln -svfh "$COREPOS/pos/is4c-nf" "/var/www/lane"
 
 
 # set up mysql for network use

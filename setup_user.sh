@@ -30,4 +30,4 @@ cp "$SUPPORT/template.gitconfig" ~/.gitconfig
 sleep 10
 kill `pidof firefox` 2>/dev/null
 sed -i '/"browser.startup.homepage"/d' ~/.mozilla/firefox/*/prefs.js
-echo 'user_pref("browser.startup.homepage", "http://localhost/POS/install/index.php");' >> ~/.mozilla/firefox/*/prefs.js
+echo 'user_pref("browser.startup.homepage", "http://localhost/lane/install/index.php");' >> ~/.mozilla/firefox/*/prefs.js
