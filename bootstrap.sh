@@ -31,7 +31,7 @@ apt-get install git
 apt-get install software-properties-common python-software-properties
 
 # get latest CORE-Support directory; if user specified "rm" argument, deletes old one
-if [ -n "$1" -a "$1" -eq "rm" ]; then
+if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$SUPPORT"
 fi
 mkdir -p "$SUPPORT"
@@ -43,7 +43,7 @@ chown -Rf cashier "$SUPPORT"
 . ./apt-updates.sh
 
 # get latest CORE-POS directory; if user specified "rm" argument, deletes old one
-if [ -n "$1" -a "$1" -eq "rm" ]; then
+if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
 fi
 mkdir -p "$COREPOS"
