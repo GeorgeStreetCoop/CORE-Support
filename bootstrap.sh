@@ -38,6 +38,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 else
 	cd "$SUPPORT"
 	git reset --hard HEAD
+	git pull
 fi
 chown -Rf cashier "$SUPPORT"
 
@@ -53,6 +54,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 else
 	cd "$COREPOS"
 	git reset --hard HEAD
+	git pull
 fi
 chown -Rf cashier "$COREPOS"
 
