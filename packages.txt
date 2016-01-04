@@ -13,4 +13,4 @@ smartgithg
 unetbootin
 usbmount
 unzip
-p7z-full
+p7zip-full
