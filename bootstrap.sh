@@ -34,10 +34,13 @@ apt-get install software-properties-common python-software-properties
 # get latest CORE-Support directory; if user specified "rm" argument, deletes old one
 if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$SUPPORT"
+	mkdir -p "$SUPPORT" 2>/dev/null
+	cd "$SUPPORT"
+	git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
+else
+	cd "$SUPPORT"
+	git pull
 fi
-mkdir -p "$SUPPORT" 2>/dev/null
-cd "$SUPPORT"
-git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 chown -Rf cashier "$SUPPORT"
 
 # install needed packages
@@ -46,10 +49,13 @@ chown -Rf cashier "$SUPPORT"
 # get latest CORE-POS directory; if user specified "rm" argument, deletes old one
 if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
+	mkdir -p "$COREPOS" 2>/dev/null
+	cd "$COREPOS"
+	git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
+else
+	cd "$COREPOS"
+	git pull
 fi
-mkdir -p "$COREPOS" 2>/dev/null
-cd "$COREPOS"
-git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
 chown -Rf cashier "$COREPOS"
 
 # set up our ini files:
