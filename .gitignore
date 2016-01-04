@@ -1,2 +1,4 @@
 ini-local.php
+php-errors.log
+queries.log
 /ssddir
