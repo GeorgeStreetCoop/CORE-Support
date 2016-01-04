@@ -28,8 +28,6 @@ tasksel install lamp-server
 
 # bootstrap git
 apt-get install git
-# bootstrap adding apt repositories
-apt-get install software-properties-common python-software-properties
 
 # get latest CORE-Support directory; if user specified "rm" argument, deletes old one
 if [ -n "$1" -a "$1" = "rm" ]; then
