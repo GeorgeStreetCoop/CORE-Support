@@ -15,7 +15,7 @@ fi
 LANEIP="192.168.1.$((${LANENUMBER}+50))"
 echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
 
-# get password for mysql 'pos' user
+# get password for mysql 'lane' user
 while [ -z "$LANEPASSWORD" ]; do
 	read -s -p "What is the password for the mysql 'lane' user? " LANEPASSWORD
 done
@@ -30,9 +30,11 @@ apt-get install git
 # bootstrap adding apt repositories
 apt-get install software-properties-common python-software-properties
 
-# get latest Support directory
-rm -rf "$SUPPORT"
-mkdir "$SUPPORT"
+# get latest CORE-Support directory; if user specified "rm" argument, deletes old one
+if [ -n "$1" -a "$1" -eq "rm" ]; then
+	rm -rf "$SUPPORT"
+fi
+mkdir -p "$SUPPORT"
 cd "$SUPPORT"
 git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 chown -Rf cashier "$SUPPORT"
@@ -40,9 +42,11 @@ chown -Rf cashier "$SUPPORT"
 # install needed packages
 . ./apt-updates.sh
 
-# get latest POS directory
-rm -rf "$COREPOS"
-mkdir "$COREPOS"
+# get latest CORE-POS directory; if user specified "rm" argument, deletes old one
+if [ -n "$1" -a "$1" -eq "rm" ]; then
+	rm -rf "$COREPOS"
+fi
+mkdir -p "$COREPOS"
 cd "$COREPOS"
 git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
 chown -Rf cashier "$COREPOS"
