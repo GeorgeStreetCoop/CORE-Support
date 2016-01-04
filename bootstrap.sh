@@ -34,7 +34,7 @@ apt-get install software-properties-common python-software-properties
 if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$SUPPORT"
 fi
-mkdir -p "$SUPPORT"
+mkdir -p "$SUPPORT" 2>/dev/null
 cd "$SUPPORT"
 git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 chown -Rf cashier "$SUPPORT"
@@ -46,7 +46,7 @@ chown -Rf cashier "$SUPPORT"
 if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
 fi
-mkdir -p "$COREPOS"
+mkdir -p "$COREPOS" 2>/dev/null
 cd "$COREPOS"
 git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
 chown -Rf cashier "$COREPOS"
@@ -95,7 +95,7 @@ sed -i '$a 192.168.1.53    lane3' /etc/hosts
 
 
 # set up webserver
-ln -svfh "$COREPOS/pos/is4c-nf" "/var/www/lane"
+ln -svf "$COREPOS/pos/is4c-nf" "/var/www/lane"
 
 
 # set up mysql for network use
