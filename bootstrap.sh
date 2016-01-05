@@ -75,6 +75,8 @@ chown www-data "$COREPOS/pos/is4c-nf/ini.json"
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
 chown www-data "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
 ln -svf "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log" "$SUPPORT"
+ln -svf /var/log/apache/access.log "$SUPPORT/apache_access.log
+ln -svf /var/log/apache/error.log "$SUPPORT/apache_error.log"
 
 
 # set up grub boot process
