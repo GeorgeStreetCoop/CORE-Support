@@ -88,7 +88,7 @@ ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
 
 
 # set up lane URL
-ln -svf "$COREPOS/pos/is4c-nf" "/var/www/lane"
+ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane" 2>/dev/null
 
 
 # set up mysql users and basic data
