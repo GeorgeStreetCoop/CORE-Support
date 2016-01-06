@@ -19,8 +19,6 @@ touch ~/.config/openbox/autostart
 sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d' ~/.config/openbox/autostart
 echo 'xterm >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'firefox >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
-echo 'geany >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
-echo 'smartgithg >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 
 # set up git credentials
 cp "$SUPPORT/template.gitconfig" ~/.gitconfig
