@@ -27,7 +27,7 @@ tasksel install lamp-server
 
 
 # bootstrap git
-apt-get install git
+apt-get -y install git
 
 # get latest CORE-Support directory; if user specified "rm" argument, deletes old one
 if [ -n "$1" -a "$1" = "rm" ]; then
