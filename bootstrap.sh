@@ -88,7 +88,7 @@ ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
 
 
 # set up lane URL
-ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane" 2>/dev/null
+ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane"
 
 
 # set up mysql users and basic data
@@ -98,10 +98,6 @@ mysql -u root -p --force < "$SUPPORT/setup_db.sql"
 
 # set up ssd, including boot process
 . "$SUPPORT/setup_serial.sh"
-
-
-# set up slim login manager
-. "$SUPPORT/setup_slim.sh"
 
 
 # set up user "cashier" (runs as that user ID)
