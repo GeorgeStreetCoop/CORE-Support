@@ -8,5 +8,5 @@ fi
 
 
 # set up slim login manager
-cmp -s "$SUPPORT/template.slim.conf" /etc/slim.conf && cp /etc/slim.conf /etc/slim.conf~
+cmp -s "$SUPPORT/template.slim.conf" /etc/slim.conf || cp /etc/slim.conf /etc/slim.conf~
 cp "$SUPPORT/template.slim.conf" /etc/slim.conf
