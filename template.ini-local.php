@@ -69,7 +69,7 @@ Screen Message Settings
 ************************************************************************************/
 
 $CORE_LOCAL->set('trainingMsgCount',0, True);
-$CORE_LOCAL->set('alertBar','Lane 1', True);
+$CORE_LOCAL->set('alertBar','Lane ###LANENUMBER###', True);
 
 
 /***********************************************************************************
