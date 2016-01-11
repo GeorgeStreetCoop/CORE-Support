@@ -100,6 +100,10 @@ mysql -u root -p --force < "$SUPPORT/setup_db.sql"
 . "$SUPPORT/setup_serial.sh"
 
 
+# set up ssd, including boot process
+. "$SUPPORT/setup_xwindows.sh"
+
+
 # set up user "cashier" (runs as that user ID)
 su -c "$SUPPORT/setup_user.sh" - cashier
 
