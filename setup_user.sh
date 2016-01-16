@@ -12,6 +12,7 @@ sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d' ~/.bashrc
 echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
+echo 'alias kick="echo -en \\\x1Bp0~~ >/dev/ttyS1"' >> ~/.bashrc
 
 # set up openbox autolaunch
 mkdir -p ~/.config/openbox
