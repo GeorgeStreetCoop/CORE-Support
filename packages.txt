@@ -3,6 +3,7 @@ xorg
 slim
 openbox
 firefox
+ttf-mscorefonts-installer
 phpmyadmin
 geany
 openssh-server
