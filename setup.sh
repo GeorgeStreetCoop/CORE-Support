@@ -126,6 +126,6 @@ chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf
 
 # cleanup environment
 unset LANEPASSWORD
-if [ -z "$WD_BEFORE_COREPOS_SETUP" ]; then
+if [ -n "$WD_BEFORE_COREPOS_SETUP" ]; then
 	cd "$WD_BEFORE_COREPOS_SETUP"
 fi
