@@ -51,7 +51,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
 	mkdir -p "$COREPOS" 2>/dev/null
 	cd "$COREPOS"
-	git clone https://github.com/CORE-POS/IS4C.git --branch version-1.9 "$COREPOS"
+	git clone https://github.com/GeorgeStreetCoop/CORE-POS.git --branch version-1.9 "$COREPOS"
 else
 	cd "$COREPOS"
 	git reset --hard HEAD
