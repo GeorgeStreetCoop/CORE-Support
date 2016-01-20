@@ -10,9 +10,19 @@ if [ -z "$COREPOS" ]; then
 fi
 
 
-# set up static IP
+# set up static IP from hstname lane number and IP address
 # 2016-01-02: commented out as seems to break networking entirely; reserved DHCP is sufficient.
-# sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
+## use hostname ("lane#") to determine IP address
+## LANEID=`hostname`
+## LANENUMBER=`echo ${LANEID}|sed -n 's/^lane\([0-9]*\)$/\1/p'`
+## if [ -z "$LANENUMBER" ]; then
+## 	echo "Host '${LANEID}' does not appear to be a POS lane. Aborting lane install." >&2
+## 	exit 2
+## fi
+## LANEIP="192.168.1.$((${LANENUMBER}+50))"
+## echo "Setting up POS lane #${LANENUMBER} to use IP address ${LANEIP}..."
+## sed "s/###LANEIP###/${LANEIP}/g" "$SUPPORT/template.interfaces" > /etc/network/interfaces
+
 
 # set up fannie and lane hosts
 sed -i '/^192.168.1.50\b/d' /etc/hosts
