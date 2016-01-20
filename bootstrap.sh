@@ -108,6 +108,10 @@ mysql -u root -p --force < "$SUPPORT/setup_db.sql"
 su -c "$SUPPORT/setup_user.sh" - cashier
 
 
+# set up George Street receipt formatting
+. "$SUPPORT/setup_receipt.sh"
+
+
 # set background image to Co-op logo
 ln -svf "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
 chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
