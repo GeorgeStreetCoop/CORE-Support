@@ -49,7 +49,7 @@ else
 fi
 chown -Rf cashier "$SUPPORT"
 
-# install needed packages
+# install/update needed packages
 . "$SUPPORT/setup_packages.sh"
 
 

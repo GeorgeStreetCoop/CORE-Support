@@ -12,3 +12,7 @@ done
 # add packages
 sudo apt-get -qq update
 sudo apt-get -y install `cat packages.txt`
+
+
+# upgrade packages
+sudo apt-get upgrade
