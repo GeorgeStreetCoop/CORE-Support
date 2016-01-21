@@ -60,7 +60,7 @@ Receipt & Printer Settings
 ************************************************************************************/
 
 $CORE_LOCAL->set('print',1, True);
-$CORE_LOCAL->set('newReceipt',1, True);
+$CORE_LOCAL->set('newReceipt',2, True);
 $CORE_LOCAL->set('printerPort','/dev/ttyS1', True);
 
 
