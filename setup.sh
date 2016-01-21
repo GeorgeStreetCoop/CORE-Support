@@ -96,6 +96,8 @@ ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
 
 # set up lane URL
 ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane"
+# prevent recursive link
+find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
 # set up mysql users and basic data
