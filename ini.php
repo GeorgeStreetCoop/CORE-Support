@@ -79,7 +79,7 @@ $CORE_LOCAL->set('SpecialUpcClasses',array(), True);
 $CORE_LOCAL->set('houseCouponPrefix','00499999', True);
 $CORE_LOCAL->set('CouponsAreTaxable',1, True);
 $CORE_LOCAL->set('EquityDepartments',array('0'), True);
-$CORE_LOCAL->set('ArDepartments',array('0'), True);
+$CORE_LOCAL->set('ArDepartments','', True);
 $CORE_LOCAL->set('roundUpDept',701, True);
 $CORE_LOCAL->set('DiscountTypeClasses',array(), True);
 $CORE_LOCAL->set('PriceMethodClasses',array(), True);
