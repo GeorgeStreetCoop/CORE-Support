@@ -12,3 +12,6 @@ done
 # add packages
 sudo apt-get -qq update
 sudo apt-get -y install `cat packages.txt`
+
+# update to latest versions
+sudo apt-get -y upgrade
