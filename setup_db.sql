@@ -33,21 +33,13 @@ ON core_translog.*
 TO lane@localhost;
 
 
-DROP USER office@'192.168.1.%';
+-- DROP USER office@'192.168.1.%';
 
 CREATE USER office@'192.168.1.%'
 IDENTIFIED BY PASSWORD '*D65D4DCBD3434E7355CC23798E9BBDA85B441A48';
 
-GRANT ALL PRIVILEGES
+GRANT SELECT, INSERT, CREATE, DROP, ALTER, LOCK TABLES
 ON core_opdata.*
-TO office@'192.168.1.%';
-
-GRANT ALL PRIVILEGES
-ON core_server.*
-TO office@'192.168.1.%';
-
-GRANT ALL PRIVILEGES
-ON core_translog.*
 TO office@'192.168.1.%';
 
 
