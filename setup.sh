@@ -67,13 +67,10 @@ fi
 chown -Rf cashier "$COREPOS"
 
 # set up our ini files:
-# ini.php is linked, so changes reflect back up to the shared codebase
+# ini.php is linked to a copy, so local changes don't automatically share
+sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini.php" > "$SUPPORT/ini.php"
 ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
 chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
-# ini-local.php is linked to a copy, so local changes don't automatically share
-sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini-local.php" > "$SUPPORT/ini-local.php"
-ln -svf "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
-chown www-data "$SUPPORT/ini-local.php" "$COREPOS/pos/is4c-nf/ini-local.php"
 # ini.json is simply created empty; for the moment, this file doesn't sync
 touch "$COREPOS/pos/is4c-nf/ini.json"
 chown www-data "$COREPOS/pos/is4c-nf/ini.json"
