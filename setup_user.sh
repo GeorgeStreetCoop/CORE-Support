@@ -20,12 +20,13 @@ echo 'alias nv1="echo -en \\\x1Cp\\\x010 >/dev/ttyS1"' >> ~/.bashrc
 # set up openbox autolaunch
 mkdir -p ~/.config/openbox
 touch ~/.config/openbox/autostart
-sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d;/xrandr/d' ~/.config/openbox/autostart
+sed -i '/xterm/d;/firefox/d;/geany/d;/smartgit/d;/xrandr/d;/numlockx/d;' ~/.config/openbox/autostart
 echo 'xterm >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'firefox >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 # echo 'geany >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 # echo 'smartgithg >/dev/null 2>&1 &' >> ~/.config/openbox/autostart
 echo 'xrandr --output VGA1 --mode 1024x768 --rate 75' >> ~/.config/openbox/autostart
+echo '[ -x /usr/bin/numlockx ] && /usr/bin/numlockx on' >> ~/.config/openbox/autostart
 
 # set up git credentials
 cp "$SUPPORT/template.gitconfig" ~/.gitconfig

@@ -4,6 +4,7 @@ slim
 openbox
 firefox
 ttf-mscorefonts-installer
+numlockx
 phpmyadmin
 geany
 openssh-server
