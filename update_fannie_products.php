@@ -36,7 +36,7 @@
 			</tr>
 			<tr>
 				<td>Username</td>
-				<td><?=installTextField('FANNIE_SERVER_USER', $FANNIE_SERVER_USER, 'fannie')?></td>
+				<td><?=installTextField('FANNIE_SERVER_USER', $FANNIE_SERVER_USER, 'office')?></td>
 			</tr>
 			<tr>
 				<td>Password</td>
@@ -56,65 +56,68 @@
 	ini_set('log_errors', 0);
 	ini_set('error_log', '/dev/null');
 
-	extract($_POST);
+	if (count($_POST)) {
+		extract($_POST);
 
-	$coop_dsn = "mysql:dbname={$coop_product_db};host={$coop_host}";
-	try {
-		$coop_db = new PDO($coop_dsn, $coop_user, $coop_pw);
-	} catch (PDOException $e) {
-		echo "Co-op connection ({$coop_dsn}) failed: " . $e->getMessage();
-	}
-
-	$fannie_dsn = "mysql:dbname={$FANNIE_OP_DB};host={$FANNIE_SERVER}";
-	try {
-		$fannie_db = new PDO($fannie_dsn, $FANNIE_SERVER_USER, $FANNIE_SERVER_PW);
-	} catch (PDOException $e) {
-		echo 'Fannie connection failed: ' . $e->getMessage();
-	}
-
-	$coop_products_q = $coop_db->query('SELECT * FROM CoopProductsForIS4C');
-
-	$fannie_products_q = $fannie_db->prepare('
-			REPLACE products
-			SET
-				upc = :upc,
-				description = :description,
-				brand = :brand,
-				normal_price = :normal_price,
-				department = :department,
-				tax = :tax,
-				foodstamp = :foodstamp,
-				scale = :scale,
-				discount = 1,
-				wicable = :wicable,
-				inUse = :inUse,
-				id = :id
-		');
-
-	flush();
-	while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
-		$params = array();
-		foreach ($coop_product as $column => $value) {
-			$params[':'.$column] = $value;
+		$coop_dsn = "mysql:dbname={$coop_product_db};host={$coop_host}";
+		try {
+			$coop_db = new PDO($coop_dsn, $coop_user, $coop_pw);
+		} catch (PDOException $e) {
+			echo "Co-op connection ({$coop_dsn}) failed: " . $e->getMessage();
 		}
 
-		if (!($r = $fannie_products_q->execute($params)))
-			reportInsertError($fannie_products_q, $params);
+		$fannie_dsn = "mysql:dbname={$FANNIE_OP_DB};host={$FANNIE_SERVER}";
+		try {
+			$fannie_db = new PDO($fannie_dsn, $FANNIE_SERVER_USER, $FANNIE_SERVER_PW);
+		} catch (PDOException $e) {
+			echo 'Fannie connection failed: ' . $e->getMessage();
+		}
 
-		if ($r) {
-			echo '.';
-			if (++$i % 500 === 0) {
-				echo "<br>\n";
-				flush();
+		$coop_products_q = $coop_db->query('SELECT * FROM CoopProductsForIS4C');
+
+		$fannie_products_q = $fannie_db->prepare('
+				REPLACE products
+				SET
+					upc = :upc,
+					description = :description,
+					brand = :brand,
+					normal_price = :normal_price,
+					department = :department,
+					tax = :tax,
+					foodstamp = :foodstamp,
+					scale = :scale,
+					discount = 1,
+					wicable = :wicable,
+					inUse = :inUse,
+					id = :id
+			');
+
+		flush();
+		while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
+			$params = array();
+			foreach ($coop_product as $column => $value) {
+				$params[':'.$column] = $value;
 			}
+
+			if (!($r = $fannie_products_q->execute($params)))
+				reportInsertError($fannie_products_q, $params);
+
+			if ($r) {
+				echo '.';
+				if (++$i % 500 === 0) {
+					echo "<br>\n";
+					flush();
+				}
+			}
+			elseif ((++$e >= 5) && ($e > $i * 5))
+				die;
 		}
-		elseif ((++$e >= 5) && ($e > $i * 5))
-			die;
-	}
 ?>
-	<hr>
+		<hr>
 <?
-	flush();
+		flush();
+	}
+
 	for ($i = 1; $i <= 3; $i++) {
 		$ping = shell_exec("ping -q -t2 -c3 192.168.1.5{$i}");
 		echo "Lane {$i} (192.168.1.5{$i}): <b style=\"color:";
