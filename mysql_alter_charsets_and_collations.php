@@ -102,7 +102,7 @@ function convertDatabase($host, $username, $password, $database, $convert_from, 
 		$table = mysql_real_escape_string($row_tables[0]);
 
 		if ($show_alter_table) {
-			$commands["{$database}.{$table}"] = ("ALTER TABLE `$table` DEFAULT CHARACTER SET $character_set");
+			$commands["{$database}.{$table}"] = ("ALTER TABLE `$table` DEFAULT CHARACTER SET $character_set COLLATE $convert_to");
 		}
  
 		$rs = mysql_query("SHOW FULL FIELDS FROM `$table`");
@@ -152,14 +152,14 @@ function convertDatabase($host, $username, $password, $database, $convert_from, 
 	if ($execute) {
 		$errors = array();
 		foreach ($commands as $ref => $command) {
-			echo "{$command}: ";
+			echo htmlentities($command) . '&nbsp;&nbsp;&nbsp;';
 			$ret = mysql_query($command);
 			if ($ret === false) {
 				$errors[$command] = $ref.': '.mysql_error();
 				echo '<span style="color:red">'.htmlentities(mysql_error())."</span>\n";
 			}
 			else {
-				echo "<span style=\"color:green\">OK</span>\n";
+				echo "<span style=\"color:green\"><b>√</b></span>\n";
 			}
 			flush();
 		}
