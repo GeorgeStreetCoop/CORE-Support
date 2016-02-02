@@ -212,6 +212,24 @@
 			elseif ((++$e >= 5) && ($e > $i * 5))
 				die;
 		}
+
+		// Add non-member POS lookups
+		$fannie_nonmembers = array(
+				array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
+				// Use :discount = 0 because query adds 5 when it detects :is_senior == 1!
+				array(':card_no' => 62, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
+			);
+		foreach ($fannie_nonmembers as $fannie_nonmember) {
+			if (!($r = $fannie_custdata_q->execute($fannie_nonmember)))
+				reportInsertError($fannie_custdata_q, $fannie_nonmember);
+			if ($r) {
+				echo ',';
+				if (++$i % 500 === 0) {
+					echo "<br>\n";
+					flush();
+				}
+			}
+		}
 ?>
 		<hr>
 <?
