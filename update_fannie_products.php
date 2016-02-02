@@ -76,7 +76,7 @@
 		$coop_products_q = $coop_db->query('SELECT * FROM CoopProductsForIS4C');
 
 		$fannie_products_q = $fannie_db->prepare('
-				REPLACE products
+				INSERT products
 				SET
 					upc = :upc,
 					description = :description,
@@ -89,6 +89,21 @@
 					discount = 1,
 					wicable = :wicable,
 					inUse = :inUse,
+					deposit = :deposit,
+					id = :id
+				ON DUPLICATE KEY UPDATE
+					upc = :upc,
+					description = :description,
+					brand = :brand,
+					normal_price = :normal_price,
+					department = :department,
+--					tax = :tax,
+--					foodstamp = :foodstamp,
+--					scale = :scale,
+--					discount = 1,
+--					wicable = :wicable,
+--					inUse = :inUse,
+					deposit = :deposit,
 					id = :id
 			');
 
