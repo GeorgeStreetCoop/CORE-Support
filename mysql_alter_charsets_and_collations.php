@@ -29,6 +29,9 @@ if (count($_POST)) {
 
 	echo "<pre>\n";
 	$ret = convertDatabase($host, $username, $password, $database, $convert_from, $convert_to, $execute);
+	if (is_string($ret)) {
+		echo '<span style="color:red">'.htmlentities($ret)."</span>\n";
+	}
 	echo "</pre>\n";
 }
 
@@ -166,7 +169,7 @@ function convertDatabase($host, $username, $password, $database, $convert_from, 
 		return $errors;
 	}
 	else {
-		echo join(";\r\n", $commands);
+		echo join(";\r\n", $commands) . ';';
 	}
 	return true;
 }
