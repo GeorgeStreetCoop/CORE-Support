@@ -33,19 +33,19 @@
 			</tr>
 			<tr>
 				<td>Host</td>
-				<td><?=installTextField('FANNIE_SERVER', $OFFICE_SERVER, 'localhost')?></td>
+				<td><?=installTextField('OFFICE_SERVER', $OFFICE_SERVER, 'localhost')?></td>
 			</tr>
 			<tr>
 				<td>Username</td>
-				<td><?=installTextField('FANNIE_SERVER_USER', $OFFICE_SERVER_USER, 'office')?></td>
+				<td><?=installTextField('OFFICE_SERVER_USER', $OFFICE_SERVER_USER, 'office')?></td>
 			</tr>
 			<tr>
 				<td>Password</td>
-				<td><?=installTextField('FANNIE_SERVER_PW', $OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('OFFICE_SERVER_PW', $OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
 			</tr>
 			<tr>
 				<td>Database</td>
-				<td><?=installTextField('FANNIE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
+				<td><?=installTextField('OFFICE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
 			</tr>
 		</table>
 		<button type="submit">Update Now!</button>
