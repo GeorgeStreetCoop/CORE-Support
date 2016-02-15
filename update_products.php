@@ -91,6 +91,7 @@
 					scale = :scale,
 					discount = 1,
 					wicable = :wicable,
+					cost = :cost,
 					inUse = :inUse,
 					deposit = :deposit,
 					id = :id
@@ -105,6 +106,7 @@
 					scale = :scale,
 --					discount = 1,
 --					wicable = :wicable,
+					cost = :cost,
 					inUse = :inUse,
 					deposit = :deposit,
 					id = :id
