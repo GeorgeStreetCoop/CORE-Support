@@ -78,6 +78,7 @@
 
 		$coop_products_q = $coop_db->query('SELECT * FROM CoopProductsForIS4C');
 
+		$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
 		$office_products_q = $office_db->prepare('
 				INSERT products
 				SET
@@ -91,6 +92,7 @@
 					scale = :scale,
 					discount = 1,
 					wicable = :wicable,
+					qttyEnforced = :qttyEnforced,
 					cost = :cost,
 					inUse = :inUse,
 					deposit = :deposit,
@@ -106,6 +108,7 @@
 					scale = :scale,
 --					discount = 1,
 --					wicable = :wicable,
+					qttyEnforced = :qttyEnforced,
 					cost = :cost,
 					inUse = :inUse,
 					deposit = :deposit,
