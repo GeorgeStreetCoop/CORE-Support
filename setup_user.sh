@@ -16,6 +16,8 @@ echo 'alias k="echo -en \\\x1Bp0~~ >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias kk="echo -en \\\x10\\\x14\\\x01\\\x00\\\x08 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias c="echo -en \\\n\\\n\\\n\\\n\\\x1DV1 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias nv1="echo -en \\\x1Cp\\\x010 >/dev/ttyS1"' >> ~/.bashrc
+echo 'alias log_cl="clear; > /CORE-POS/pos/is4c-nf/log/queries.log; > /CORE-POS/pos/is4c-nf/log/php-errors.log"' >> ~/.bashrc
+echo 'alias log_pr="tail -f /CORE-POS/pos/is4c-nf/log/queries.log & tail -f /CORE-POS/pos/is4c-nf/log/php-errors.log &"' >> ~/.bashrc
 
 # set up openbox autolaunch
 mkdir -p ~/.config/openbox
