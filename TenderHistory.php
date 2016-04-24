@@ -36,10 +36,10 @@ h3	{
 	<form method="post">
 		<table>
 			<tr>
-				<td colspan="2"><h3>Destination Database: CORE-POS Office</h3></td>
+				<td colspan="2"><h3>CORE-POS Tender History</h3></td>
 			</tr>
 			<tr>
-				<td>Host</td>
+				<td>Database Host</td>
 				<td><input type="text" name="host" size="45" value="<?=$host?:'localhost'?>"></td>
 			</tr>
 			<tr>
@@ -51,22 +51,26 @@ h3	{
 				</td>
 			</tr>
 			<tr>
-				<td>Database</td>
-				<td><input type="text" name="database" size="45" value="<?=$database?:'office_trans'?>"></td>
+				<td>Database / Table</td>
+				<td>
+					<input type="text" name="database" value="<?=$database?:'office_trans'?>">
+					&nbsp;
+					<input type="text" name="trans_table" value="<?=$trans_table?:'transarchive'?>">
+				</td>
 			</tr>
 			<tr>
-				<td>Start Date</td>
-				<td><input type="date" name="startdate" value="<?=$startdate?:date('Y-m-d', 'one week ago')?>"></td>
-			</tr>
-			<tr>
-				<td>End Date</td>
-				<td><input type="date" name="enddate" value="<?=$enddate?:date('Y-m-d')?>"></td>
+				<td>Start / End Date</td>
+				<td>
+					<input type="date" name="startdate" value="<?=$startdate?:date('Y-m-d', strtotime('today - 7 days'))?>">
+					&nbsp;
+					<input type="date" name="enddate" value="<?=$enddate?:date('Y-m-d')?>">
+				</td>
 			</tr>
 			<tr>
 				<td>
 				</td>
 				<td>
-					<button type="submit">Do It Now!</button>
+					<button type="submit">Show It Now!</button>
 				</td>
 			</tr>
 		</table>
@@ -86,7 +90,7 @@ h3	{
 		echo 'Office connection failed: ' . $e->getMessage();
 	}
 
-	$transarchive = 'transarchive';
+	$opdata_dbname = 'core_opdata';
 	$report_params = array(
 		'department' => "
 					SELECT
@@ -96,12 +100,11 @@ h3	{
 						SUM(IF(d.department IN (102, 113) OR d.scale = 1, 1, d.quantity)) GroupQuantity,
 						'item' GroupQuantityLabel,
 						SUM(d.total) GroupValue
-					FROM {$transarchive} d
-						LEFT JOIN core_opdata.departments t ON d.department=t.dept_no
+					FROM {$trans_table} d
+						LEFT JOIN {$opdata_dbname}.departments t ON d.department=t.dept_no
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
---						AND (d.trans_type = 'D' OR (d.trans_type = 'D' AND d.trans_subtype IN ('NA', 'AD')))
-						AND d.department <> 0
+						AND d.department != 0
 					GROUP BY TransDate, t.dept_no
 					HAVING TransDate = :trans_date
 				",
@@ -113,7 +116,7 @@ h3	{
 						COUNT(*) GroupQuantity,
 						'transaction' GroupQuantityLabel,
 						SUM(d.total) GroupValue
-					FROM {$transarchive} d
+					FROM {$trans_table} d
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'A' AND d.upc = 'TAX'
@@ -128,7 +131,7 @@ h3	{
 						COUNT(*) GroupQuantity,
 						'transaction' GroupQuantityLabel,
 						-SUM(d.total) GroupValue
-					FROM {$transarchive} d
+					FROM {$trans_table} d
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'S' AND d.upc = 'DISCOUNT'
@@ -143,8 +146,8 @@ h3	{
 						COUNT(*) GroupQuantity,
 						'transaction' GroupQuantityLabel,
 						-SUM(d.total) GroupValue
-					FROM {$transarchive} d
-						LEFT JOIN core_opdata.tenders t ON d.trans_subtype = t.TenderCode
+					FROM {$trans_table} d
+						LEFT JOIN {$opdata_dbname}.tenders t ON d.trans_subtype = t.TenderCode
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'T'
@@ -191,7 +194,12 @@ h3	{
 			$total_quantity = rtrim(number_format($total_quantity, 3), '.0');
 			$total_value = number_format($total_value, 2);
 
-			echo("<b>All ".ucwords($plural).": \${$total_value} from {$total_quantity} {$group_quantity_label}".($total_quantity==1?'':'s')."</b><br>\n");
+			if ($plural) {
+				echo("<b>All ".ucwords($plural).": \${$total_value} from {$total_quantity} {$group_quantity_label}".($total_quantity==1?'':'s')."</b><br>\n");
+			}
+			else {
+				echo "<i>No data found</i>.<br>\n";
+			}
 		}
 
 		$checksum = 0;
