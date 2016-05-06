@@ -350,7 +350,7 @@
 		$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
 		$lane_up = $lane_loss < 50;
 		$lane_stats = $lane_up? 'UP' : 'DOWN';
-		if ($lane_up) {
+		if ($lane_up && strlen($OFFICE_SERVER_PW)) {
 			$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
 			try {
 				$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
