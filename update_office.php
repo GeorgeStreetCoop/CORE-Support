@@ -349,24 +349,24 @@
 		$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
 		$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
 		$lane_up = $lane_loss < 50;
-		$lane_status = $lane_up? 'UP' : 'DOWN';
+		$lane_stats = $lane_up? 'UP' : 'DOWN';
 		if ($lane_up) {
 			$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
 			try {
 				$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
 				$lane_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
+				$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
+				if ($lane_login['LoggedIn'])
+					$lane_trans = $lane_db->query('SELECT COUNT(*) FROM core_translog.localtemptrans')->fetch(PDO::FETCH_NUM);
+				$lane_stats = trim($lane_login['Cashier'], ' .')
+						. ': '
+						. ($lane_login['LoggedIn']?
+								($lane_trans[0]? 'in transaction' : 'logged in')
+								: 'logged out'
+							);
 			} catch (PDOException $e) {
 				echo "Co-op connection ({$lane_db}) failed: " . $e->getMessage();
 			}
-			$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
-			if ($lane_login['LoggedIn'])
-				$lane_trans = $lane_db->query('SELECT COUNT(*) FROM core_translog.localtemptrans')->fetch(PDO::FETCH_NUM);
-			$lane_stats = trim($lane_login['Cashier'], ' .')
-					. ': '
-					. ($lane_login['LoggedIn']?
-							($lane_trans[0]? 'in transaction' : 'logged in')
-							: 'logged out'
-						);
 		}
 		echo "Lane {$i} ({$lane_ip}): <b style=\"color:";
 		echo ($lane_up? 'green">'.$lane_stats : 'red">DOWN');
