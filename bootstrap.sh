@@ -45,6 +45,10 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	cd "$SUPPORT"
 	git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 else
+	if [ ! -d "$SUPPORT" ]; then
+		echo "Directory '$SUPPORT' doesn't exist. Aborting lane install. Try again with 'rm' override parameter?" >&2
+		return
+	fi
 	cd "$SUPPORT"
 	git reset --hard HEAD
 	git pull
