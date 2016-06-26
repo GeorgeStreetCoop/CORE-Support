@@ -18,8 +18,13 @@ fi
 LANEID=`hostname`
 LANENUMBER=`echo ${LANEID}|sed -n 's/^lane\([0-9]*\)$/\1/p'`
 if [ -z "$LANENUMBER" ]; then
-	echo "Host '${LANEID}' does not appear to be a POS lane. Aborting lane install." >&2
-	exit 2
+	read -p "Host '${LANEID}' does not appear to be a POS lane. Install backend only? [y/N] " -n 1 -r
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+		echo "Aborting lane install." >&2
+		return
+	fi
+	LANENUMBER=0
 fi
 
 
