@@ -50,6 +50,10 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	cd "$SUPPORT"
 	git clone https://github.com/GeorgeStreetCoop/CORE-Support.git "$SUPPORT"
 else
+	if [ ! -d "$SUPPORT" ]; then
+		echo "Directory '$SUPPORT' doesn't exist. Aborting lane install. Try again with 'rm' override parameter?" >&2
+		return
+	fi
 	cd "$SUPPORT"
 	git reset --hard HEAD
 	git pull
@@ -79,12 +83,14 @@ chown -Rf cashier "$COREPOS"
 
 # set up our ini files:
 # ini.php is linked to a copy, so local changes don't automatically share
-sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini.php" > "$SUPPORT/ini.php"
-ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
-chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
-# ini.json is simply created empty; for the moment, this file doesn't sync
-touch "$COREPOS/pos/is4c-nf/ini.json"
-chown www-data "$COREPOS/pos/is4c-nf/ini.json"
+if [ $LANENUMBER -gt 0 ]; then
+	sed "s/###LANENUMBER###/${LANENUMBER}/g;s/###LANEPASSWORD###/${LANEPASSWORD}/g" "$SUPPORT/template.ini.php" > "$SUPPORT/ini.php"
+	ln -svf "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
+	chown www-data "$SUPPORT/ini.php" "$COREPOS/pos/is4c-nf/ini.php"
+	# ini.json is simply created empty; for the moment, this file doesn't sync
+	touch "$COREPOS/pos/is4c-nf/ini.json"
+	chown www-data "$COREPOS/pos/is4c-nf/ini.json"
+fi
 
 # set up error logs
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
@@ -109,8 +115,10 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
 # set up mysql users and basic data
-echo 'When prompted below, please enter your mysql ROOT password...'
-mysql -u root -p --force < "$SUPPORT/setup_db.sql"
+if [ $LANENUMBER -gt 0 ]; then
+	echo 'When prompted below, please enter your mysql ROOT password...'
+	mysql -u root -p --force < "$SUPPORT/setup_db.sql"
+fi
 
 
 # set up ssd, including boot process
@@ -130,8 +138,10 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 
 
 # set background image to Co-op logo
-ln -svf "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
-chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+if [ $LANENUMBER -gt 0 ]; then
+	ln -svf "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+	chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+fi
 
 
 # cleanup environment
