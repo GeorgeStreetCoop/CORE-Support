@@ -1,6 +1,12 @@
 #~/bin/sh
 # run this script as regular user!
 
+# exit if we're creating a backend-only setup
+if [ $LANENUMBER -eq 0 ]; then
+	echo "This is not a POS lane; skipping user setup."
+	return
+fi
+
 # set up variables
 if [ -z "$SUPPORT" ]; then
 	SUPPORT=/CORE-Support

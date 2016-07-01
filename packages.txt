@@ -5,14 +5,5 @@ openbox
 firefox
 ttf-mscorefonts-installer
 numlockx
-phpmyadmin
-geany
 openssh-server
-openssh-client
-openjdk-7-jre
-nautilus
-smartgithg
-unetbootin
 usbmount
-unzip
-p7zip-full
