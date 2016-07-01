@@ -16,31 +16,31 @@
 
 
 # products -> productBackup; custdata -> custdataBackup
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php TableSnapshotTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php TableSnapshotTask
 
 # dtransactions ∂-> dlog_15, transarchive, bigArchive
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php TransArchiveTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php TransArchiveTask
 
 # dlog(dtransactions) -> dlog_15
-# php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php SameDayReportingTask
+# php ../CORE-POS/fannie/classlib2.0/FannieTask.php SameDayReportingTask
 
 # dlog_15 -> stockpurchases, equity_history_sum
-# php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php EquityHistoryTask
+# php ../CORE-POS/fannie/classlib2.0/FannieTask.php EquityHistoryTask
 
 # must run after Transaction Archiving, per http://github.com/CORE-POS/IS4C/wiki/Charge-Accounts
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php ArHistoryTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php ArHistoryTask
 
 # $dtrans, $dlog -> InventoryCache
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php InventoryTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php InventoryTask
 
 # push products, productUser, custdata, memberCards, custReceiptMessage, CustomerNotifications, employees, departments, tenders, houseCoupons, houseVirtualCoupons 
-# php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php LaneSyncTask
+# php ../CORE-POS/fannie/classlib2.0/FannieTask.php LaneSyncTask
 
 # $dlog -> products
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php LastSoldTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php LastSoldTask
 
 # $dlog -> weeksLastQuarter, productWeeklyLastQuarter, productSummaryLastQuarter
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php ProductSummarizeLastQuarter
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php ProductSummarizeLastQuarter
 
 # dlog_90_view -> CashPerformDay, CashPerformDay_cache, reportDataCache, batchMergeTable, shelftags, 
-php /Users/leary/WebRoot/CORE-POS/fannie/classlib2.0/FannieTask.php ReportDataCacheTask
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php ReportDataCacheTask
