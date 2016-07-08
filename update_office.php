@@ -46,7 +46,7 @@
 			</tr>
 			<tr>
 				<td>Host</td>
-				<td><?=installTextField('OFFICE_SERVER', $OFFICE_SERVER, 'localhost')?></td>
+				<td><?=installTextField('OFFICE_SERVER', $OFFICE_SERVER, '192.168.1.50')?></td>
 			</tr>
 			<tr>
 				<td>Username</td>
@@ -59,6 +59,10 @@
 			<tr>
 				<td>Database</td>
 				<td><?=installTextField('OFFICE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
+			</tr>
+			<tr>
+				<td>Office URL Base</td>
+				<td><?=installTextField('OFFICE_SERVER_URL_BASE', $OFFICE_SERVER_URL_BASE, 'office')?></td>
 			</tr>
 		</table>
 		<button type="submit">Update Now!</button>
@@ -249,11 +253,11 @@
 			}
 ?>
 			<br>
-			<a href="../CORE-POS/fannie/sync/TableSyncPage.php?tablename=custdata">Synchronize Members to Lanes</a>
+			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=custdata">Synchronize Members to Lanes</a>
 			<br>
-			<a href="../CORE-POS/fannie/sync/TableSyncPage.php?tablename=memberCards">Synchronize Member Cards to Lanes</a>
+			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=memberCards">Synchronize Member Cards to Lanes</a>
 			<br>
-			<a href="../CORE-POS/fannie/sync/TableSyncPage.php?tablename=memtype">Synchronize Member Types to Lanes</a>
+			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=memtype">Synchronize Member Types to Lanes</a>
 			<br>
 			<br>
 			<br>
@@ -290,6 +294,7 @@
 						cost = :cost,
 						inUse = :inUse,
 						deposit = :deposit,
+						default_vendor_id = :default_vendor_id,
 						id = :id
 					ON DUPLICATE KEY UPDATE
 						upc = :upc,
@@ -306,6 +311,7 @@
 						cost = :cost,
 						inUse = :inUse,
 						deposit = :deposit,
+						default_vendor_id = :default_vendor_id,
 						id = :id
 				');
 
@@ -335,7 +341,7 @@
 			}
 ?>
 			<br>
-			<a href="../CORE-POS/fannie/sync/TableSyncPage.php?tablename=products">Synchronize Products to Lanes</a>
+			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=products">Synchronize Products to Lanes</a>
 			<br>
 			<br>
 			<br>
