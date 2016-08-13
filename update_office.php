@@ -212,6 +212,11 @@
 				foreach ($coop_member as $column => $value) {
 					$params[':'.$column] = $value;
 				}
+
+				// Make member name safe for current CORE-POS charset limitations
+				$params[':last_name'] = textASCII($params[':last_name']);
+				$params[':first_name'] = textASCII($params[':first_name']);
+
 				$office_custdata_params = array_intersect_key($params, $office_custdata_paramlist);
 				$office_meminfo_params = array_intersect_key($params, $office_meminfo_paramlist);
 				$office_memdates_params = array_intersect_key($params, $office_memdates_paramlist);
@@ -407,10 +412,26 @@ function reportInsertError($query, $params)
 
 function textASCII($text_utf8)
 {
-	static $map_from = array('ä', 'é', 'í', 'ñ', 'Ö', 'ü');
-	static $map_to = array('a', 'e', 'i', 'n', 'O', 'u');
+	static $map_alphabetics = array(
+			'a' => 'åáâä',
+			'c' => 'ç',
+			'e' => 'éêë',
+			'i' => 'íîï',
+			'o' => 'óôøö',
+			'u' => 'úûü',
+		);
+	static $map;
 
-	$text_ascii = iconv('UTF-8', 'ASCII//TRANSLIT', str_replace($map_from, $map_to, $text_utf8));
+	if (empty($map)) {
+		foreach ($map_alphabetics as $to => $froms) {
+			foreach (preg_split('//u', $froms, null, PREG_SPLIT_NO_EMPTY) as $from) {
+				$map[$from] = $to;
+				$map[mb_convert_case($from, MB_CASE_UPPER, "UTF-8")] = mb_convert_case($to, MB_CASE_UPPER, "UTF-8");
+			}
+		}
+	}
+
+	$text_ascii = iconv('UTF-8', 'ASCII//TRANSLIT', strtr($text_utf8, $map));
 	if ($text_ascii === $text_utf8)
 		return $text_ascii;
 
