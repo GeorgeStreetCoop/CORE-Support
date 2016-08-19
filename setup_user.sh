@@ -14,7 +14,7 @@ fi
 
 # set up bash aliases
 touch ~/.bashrc
-sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;' ~/.bashrc
+sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;/S ()/d;' ~/.bashrc
 echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
@@ -24,6 +24,7 @@ echo 'alias c="echo -en \\\n\\\n\\\n\\\n\\\x1DV1 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias nv1="echo -en \\\x1Cp\\\x010 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias log_cl="clear; > /CORE-POS/pos/is4c-nf/log/queries.log; > /CORE-POS/pos/is4c-nf/log/php-errors.log"' >> ~/.bashrc
 echo 'alias log_pr="tail -f /CORE-POS/pos/is4c-nf/log/queries.log & tail -f /CORE-POS/pos/is4c-nf/log/php-errors.log &"' >> ~/.bashrc
+echo 'S () { echo "S$@" > /dev/ttyS0; }' >> ~/.bashrc
 
 # set up openbox autolaunch
 mkdir -p ~/.config/openbox
