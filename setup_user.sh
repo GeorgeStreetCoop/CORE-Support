@@ -14,10 +14,11 @@ fi
 
 # set up bash aliases
 touch ~/.bashrc
-sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;/S ()/d;' ~/.bashrc
+sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias r=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;/S ()/d;' ~/.bashrc
 echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
+echo "alias r=\"$SUPPORT/reset_live.sh\"" >> ~/.bashrc
 echo 'alias k="echo -en \\\x1Bp0~~ >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias kk="echo -en \\\x10\\\x14\\\x01\\\x00\\\x08 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias c="echo -en \\\n\\\n\\\n\\\n\\\x1DV1 >/dev/ttyS1"' >> ~/.bashrc
