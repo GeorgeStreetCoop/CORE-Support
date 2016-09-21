@@ -14,7 +14,7 @@ fi
 
 # set up bash aliases
 touch ~/.bashrc
-sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias r=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;/S ()/d;' ~/.bashrc
+sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias r=/d;/alias k=/d;/alias kk=/d;/alias c=/d;/alias nv1=/d;/alias log_cl=/d;/alias log_pr=/d;/S ()/d;' ~/.bashrc
 echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
