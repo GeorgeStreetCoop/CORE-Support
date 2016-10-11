@@ -18,9 +18,9 @@ sed -i '/alias firefox=/d;/alias geany=/d;/alias smartgit=/d;/alias r=/d;/alias 
 echo 'alias firefox="nohup firefox >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias geany="nohup geany >/dev/null 2>&1 &"' >> ~/.bashrc
 echo 'alias smartgit="nohup smartgithg >/dev/null 2>&1 &"' >> ~/.bashrc
-echo "alias r=\"date +'%b %d %l:%H:%S'; $SUPPORT/reset_live.sh\"" >> ~/.bashrc
-echo 'alias k="date +\'%b %d %l:%H:%S\'; echo -en \\\x1Bp0~~ >/dev/ttyS1"' >> ~/.bashrc
-echo 'alias kk="date +\'%b %d %l:%H:%S\'; echo -en \\\x10\\\x14\\\x01\\\x00\\\x08 >/dev/ttyS1"' >> ~/.bashrc
+echo "alias r=\"date +'%b %d %l:%M:%S'; $SUPPORT/reset_live.sh\"" >> ~/.bashrc
+echo 'alias k="date +\"%b %d %l:%M:%S\"; echo -en \\\x1Bp0~~ >/dev/ttyS1"' >> ~/.bashrc
+echo 'alias kk="date +\"%b %d %l:%M:%S\"; echo -en \\\x10\\\x14\\\x01\\\x00\\\x08 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias c="echo -en \\\n\\\n\\\n\\\n\\\x1DV1 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias nv1="echo -en \\\x1Cp\\\x010 >/dev/ttyS1"' >> ~/.bashrc
 echo 'alias log_cl="clear; > /CORE-POS/pos/is4c-nf/log/queries.log; > /CORE-POS/pos/is4c-nf/log/php-errors.log"' >> ~/.bashrc
