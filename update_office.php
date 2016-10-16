@@ -105,7 +105,7 @@
 						FirstName = :first_name,
 						CashBack = 20.00,
 						Balance = 0.00,
-						Discount = :discount + IF(:is_senior, 5, 0),
+						Discount = :discount,
 						MemDiscountLimit = 0.00,
 						ChargeLimit = 0.00,
 						ChargeOk = 0,
@@ -129,7 +129,7 @@
 						FirstName = :first_name,
 						CashBack = 20.00,
 					--	Balance = 0.00,
-						Discount = :discount + IF(:is_senior, 5, 0),
+						Discount = :discount,
 					--	MemDiscountLimit = 0.00,
 					--	ChargeLimit = 0.00,
 					--	ChargeOk = 0,
@@ -242,8 +242,7 @@
 			// Add non-member POS lookups
 			$office_nonmembers = array(
 					array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
-					// Use :discount = 0 because query adds 5 when it detects :is_senior == 1!
-					array(':card_no' => 62, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
+					array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
 				);
 			foreach ($office_nonmembers as $office_nonmember) {
 				if (!($r = $office_custdata_q->execute($office_nonmember)))
