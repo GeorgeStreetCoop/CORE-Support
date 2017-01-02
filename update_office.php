@@ -412,10 +412,11 @@ function reportInsertError($query, $params)
 function textASCII($text_utf8)
 {
 	static $map_alphabetics = array(
-			'a' => 'åáâä',
+			'a' => 'áâåäā',
 			'c' => 'ç',
 			'e' => 'éêë',
 			'i' => 'íîï',
+			'n' => 'ñ',
 			'o' => 'óôøö',
 			'u' => 'úûü',
 		);
