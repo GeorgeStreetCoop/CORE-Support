@@ -389,7 +389,7 @@
 
 <?php
 
-function installTextField($name, $current_val, $default, $bool, $html_vals)
+function installTextField($name, $current_val, $default='', $bool=false, $html_vals=array())
 {
 	static $ini;
 	if (!isset($ini)) {
