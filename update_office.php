@@ -391,9 +391,20 @@
 
 function installTextField($name, $current_val, $default, $bool, $html_vals)
 {
+	static $ini;
+	if (!isset($ini)) {
+		$ini_path = '/etc/gsc_pos.ini';
+		if (file_exists($ini_path)) {
+			$ini = parse_ini_file('/etc/gsc_pos.ini');
+		}
+		else {
+			$ini = array();
+		}
+	}
+
 	$html_vals['type'] = $html_vals['type']?: 'text';
 	$html_vals['name'] = $html_vals['name']?: $name;
-	$html_vals['value'] = $html_vals['value']?: $_POST[$name]?: $current_val?: $default;
+	$html_vals['value'] = $html_vals['value']?: $_POST[$name]?: $current_val?: $ini[$name]?: $default;
 
 	return '<input type="'.$html_vals['type'].'" name="'.$html_vals['name'].'" value="'.$html_vals['value'].'" />';
 }
