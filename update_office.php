@@ -19,25 +19,25 @@
 			</tr>
 			<tr>
 				<td colspan="2">Host</td>
-				<td><?=installTextField('coop_host', $coop_host, 'georgestreetcoop.com')?></td>
+				<td><?=installTextField('coop_host', @$coop_host, 'georgestreetcoop.com')?></td>
 			</tr>
 			<tr>
 				<td colspan="2">Username</td>
-				<td><?=installTextField('coop_user', $coop_user, 'geor5702_backup')?></td>
+				<td><?=installTextField('coop_user', @$coop_user, 'geor5702_backup')?></td>
 			</tr>
 			<tr>
 				<td colspan="2">Password</td>
-				<td><?=installTextField('coop_pw', $coop_pw, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('coop_pw', @$coop_pw, '', true, array('type'=>'password'))?></td>
 			</tr>
 			<tr>
 				<td>Member Database</td>
 				<td><input type="checkbox" name="xfer_members"></td>
-				<td><?=installTextField('coop_member_db', $coop_member_db, 'geor5702_members')?></td>
+				<td><?=installTextField('coop_member_db', @$coop_member_db, 'geor5702_members')?></td>
 			</tr>
 			<tr>
 				<td>Product Database</td>
 				<td><input type="checkbox" name="xfer_products"></td>
-				<td><?=installTextField('coop_product_db', $coop_product_db, 'geor5702_products')?></td>
+				<td><?=installTextField('coop_product_db', @$coop_product_db, 'geor5702_products')?></td>
 			</tr>
 		</table>
 		<table>
@@ -46,23 +46,23 @@
 			</tr>
 			<tr>
 				<td>Host</td>
-				<td><?=installTextField('OFFICE_SERVER', $OFFICE_SERVER, '192.168.1.50')?></td>
+				<td><?=installTextField('OFFICE_SERVER', @$OFFICE_SERVER, '192.168.1.50')?></td>
 			</tr>
 			<tr>
 				<td>Username</td>
-				<td><?=installTextField('OFFICE_SERVER_USER', $OFFICE_SERVER_USER, 'office')?></td>
+				<td><?=installTextField('OFFICE_SERVER_USER', @$OFFICE_SERVER_USER, 'office')?></td>
 			</tr>
 			<tr>
 				<td>Password</td>
-				<td><?=installTextField('OFFICE_SERVER_PW', $OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('OFFICE_SERVER_PW', @$OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
 			</tr>
 			<tr>
 				<td>Database</td>
-				<td><?=installTextField('OFFICE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
+				<td><?=installTextField('OFFICE_OP_DB', @$OFFICE_OP_DB, 'office_opdata')?></td>
 			</tr>
 			<tr>
 				<td>Office URL Base</td>
-				<td><?=installTextField('OFFICE_SERVER_URL_BASE', $OFFICE_SERVER_URL_BASE, 'office')?></td>
+				<td><?=installTextField('OFFICE_SERVER_URL_BASE', @$OFFICE_SERVER_URL_BASE, 'office')?></td>
 			</tr>
 		</table>
 		<button type="submit">Update Now!</button>
@@ -402,9 +402,9 @@ function installTextField($name, $current_val, $default='', $bool=false, $html_v
 		}
 	}
 
-	$html_vals['type'] = $html_vals['type']?: 'text';
-	$html_vals['name'] = $html_vals['name']?: $name;
-	$html_vals['value'] = $html_vals['value']?: $_POST[$name]?: $current_val?: $ini[$name]?: $default;
+	$html_vals['type'] = @$html_vals['type']?: 'text';
+	$html_vals['name'] = @$html_vals['name']?: $name;
+	$html_vals['value'] = @$html_vals['value']?: @$_POST[$name]?: $current_val?: @$ini[$name]?: $default;
 
 	return '<input type="'.$html_vals['type'].'" name="'.$html_vals['name'].'" value="'.$html_vals['value'].'" />';
 }
