@@ -75,12 +75,13 @@
 	ini_set('error_log', '/dev/null');
 
 	if (count($_POST))
-		$params = $_POST;
+		$invoke_params = $_POST;
 	elseif (in_array($_SERVER['argv'], $_SERVER['PHP_SELF'])) {
-		$params = $_SERVER['argv'];
-		unset($params[0]);
+		$invoke_params = $_SERVER['argv'];
+		unset($invoke_params[0]);
 	}
-	if (isset($params)) {
+
+	if (isset($invoke_params)) {
 		$allowed_params = array(
 				'OFFICE_SERVER_URL_BASE' => null,
 				'OFFICE_SERVER' => null,
@@ -95,8 +96,10 @@
 				'xfer_members' => null,
 				'xfer_products' => null,
 			);
-		$params = array_intersect_key($params, $allowed_params);
-		extract($params);
+		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
+		extract($invoke_params);
+		$sync_lanes = in_array($_SERVER['argv'], 'sync_lanes');
+		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
 
 		$office_dsn = "mysql:dbname={$OFFICE_OP_DB};host={$OFFICE_SERVER};charset=utf8";
 		try {
@@ -276,13 +279,23 @@
 					}
 				}
 			}
+
+			$member_sync_urls = array(
+					'custdata' => 'Synchronize Members to Lanes',
+					'memberCards' => 'Synchronize Member Cards to Lanes',
+					'memtype' => 'Synchronize Member Types to Lanes',
+				);
+			foreach ($member_sync_urls as $tablename => $label) {
+				$url = "{$office_server_sync_url_base}?tablename={$tablename}";
+				if ($sync_lanes) {
+					$data = file_get_contents('http:' . $url);
+					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+				}
 ?>
-			<br>
-			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=custdata">Synchronize Members to Lanes</a>
-			<br>
-			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=memberCards">Synchronize Member Cards to Lanes</a>
-			<br>
-			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=memtype">Synchronize Member Types to Lanes</a>
+				<br>
+				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
+<?			}
+?>			
 			<br>
 			<br>
 			<br>
@@ -364,9 +377,20 @@
 				elseif ((++$e >= 5) && ($e > $i * 5))
 					die;
 			}
+			$product_sync_urls = array(
+					'products' => 'Synchronize Products to Lanes',
+				);
+			foreach ($product_sync_urls as $tablename => $label) {
+				$url = "{$office_server_sync_url_base}?tablename={$tablename}";
+				if ($sync_lanes) {
+					$data = file_get_contents('http:' . $url);
+					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+				}
 ?>
-			<br>
-			<a href="//<?=$OFFICE_SERVER?>/<?=$OFFICE_SERVER_URL_BASE?>/sync/TableSyncPage.php?tablename=products">Synchronize Products to Lanes</a>
+				<br>
+				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
+<?			}
+?>			
 			<br>
 			<br>
 			<br>
