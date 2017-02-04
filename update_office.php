@@ -391,15 +391,20 @@
 					$lane_status = trim($lane_login['Cashier'], ' .');
 					$lane_transcount = $lane_db->query('SELECT COUNT(*) FROM core_translog.localtemptrans');
 					if (is_object($lane_transcount)) {
-						if ($lane_transcount->fetch(PDO::FETCH_NUM)[0])
+						$lane_transcount = $lane_transcount->fetch(PDO::FETCH_NUM);
+						if ($lane_transcount[0])
 							$lane_status .= ' in transaction';
 						else
-							$lane_status = ' logged in';
+							$lane_status .= ' logged in';
+					}
+					else {
+						$lane_status .= ' (couldn’t determine transaction status)';
 					}
 				}
 				else {
 					$lane_status = 'Logged out';
 				}
+				$lane_db = null;
 			} catch (PDOException $e) {
 				echo "Co-op connection ({$lane_db}) failed: " . $e->getMessage();
 				$lane_status = '(ERROR)';
