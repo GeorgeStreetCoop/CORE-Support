@@ -74,8 +74,29 @@
 	ini_set('log_errors', 0);
 	ini_set('error_log', '/dev/null');
 
-	if (count($_POST)) {
-		extract($_POST);
+	if (count($_POST))
+		$params = $_POST;
+	elseif (in_array($_SERVER['argv'], $_SERVER['PHP_SELF'])) {
+		$params = $_SERVER['argv'];
+		unset($params[0]);
+	}
+	if (isset($params)) {
+		$allowed_params = array(
+				'OFFICE_SERVER_URL_BASE' => null,
+				'OFFICE_SERVER' => null,
+				'OFFICE_SERVER_USER' => null,
+				'OFFICE_SERVER_PW' => null,
+				'OFFICE_OP_DB' => null,
+				'coop_host' => null,
+				'coop_user' => null,
+				'coop_pw' => null,
+				'coop_member_db' => null,
+				'coop_product_db' => null,
+				'xfer_members' => null,
+				'xfer_products' => null,
+			);
+		$params = array_intersect_key($params, $allowed_params);
+		extract($params);
 
 		$office_dsn = "mysql:dbname={$OFFICE_OP_DB};host={$OFFICE_SERVER};charset=utf8";
 		try {
