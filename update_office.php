@@ -1,7 +1,7 @@
 <?php
 	$is_cron = (php_sapi_name() == 'cli');
 	$lf = ($is_cron? "\n" : "<br>\n");
-	$hr = ($is_cron? '' : "<br><br>\n");
+	$hr = ($is_cron? '' : "<br>\n");
 	$line_length = ($is_cron? 75 : 250);
 
 	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -95,7 +95,9 @@
 			</tr>
 		</table>
 		<button type="submit">Update Now!</button>
+		<br>
 	</form>
+	<br>
 
 <?php
 	if ($is_cron) {
