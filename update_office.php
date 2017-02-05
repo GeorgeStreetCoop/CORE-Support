@@ -1,4 +1,33 @@
-<html>
+<?php
+	$is_cron = (php_sapi_name() == 'cli');
+	$lf = ($is_cron? "\n" : "<br>\n");
+	$hr = ($is_cron? '' : "<br><br>\n");
+	$line_length = ($is_cron? 75 : 250);
+
+	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING);
+	ini_set('display_errors', 1);
+	ini_set('log_errors', 0);
+	ini_set('error_log', '/dev/null');
+
+	$OFFICE_SERVER_URL_BASE = null;
+	$OFFICE_SERVER = null;
+	$OFFICE_SERVER_USER = null;
+	$OFFICE_SERVER_PW = null;
+	$OFFICE_OP_DB = null;
+	$coop_host = null;
+	$coop_user = null;
+	$coop_pw = null;
+	$coop_member_db = null;
+	$coop_product_db = null;
+
+	if ($is_cron) {
+		echo "Running as cron!";
+		echo $lf.$hr.$lf;
+		ob_start();
+	}
+?>
+<!doctype html>
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<title>Update Office Data</title>
@@ -19,25 +48,25 @@
 			</tr>
 			<tr>
 				<td colspan="2">Host</td>
-				<td><?=installTextField('coop_host', @$coop_host, 'georgestreetcoop.com')?></td>
+				<td><?=installTextField('coop_host', $coop_host, 'georgestreetcoop.com')?></td>
 			</tr>
 			<tr>
 				<td colspan="2">Username</td>
-				<td><?=installTextField('coop_user', @$coop_user, 'geor5702_backup')?></td>
+				<td><?=installTextField('coop_user', $coop_user, 'geor5702_backup')?></td>
 			</tr>
 			<tr>
 				<td colspan="2">Password</td>
-				<td><?=installTextField('coop_pw', @$coop_pw, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('coop_pw', $coop_pw, '', true, array('type'=>'password'))?></td>
 			</tr>
 			<tr>
 				<td>Member Database</td>
 				<td><input type="checkbox" name="xfer_members"></td>
-				<td><?=installTextField('coop_member_db', @$coop_member_db, 'geor5702_members')?></td>
+				<td><?=installTextField('coop_member_db', $coop_member_db, 'geor5702_members')?></td>
 			</tr>
 			<tr>
 				<td>Product Database</td>
 				<td><input type="checkbox" name="xfer_products"></td>
-				<td><?=installTextField('coop_product_db', @$coop_product_db, 'geor5702_products')?></td>
+				<td><?=installTextField('coop_product_db', $coop_product_db, 'geor5702_products')?></td>
 			</tr>
 		</table>
 		<table>
@@ -46,76 +75,81 @@
 			</tr>
 			<tr>
 				<td>Host</td>
-				<td><?=installTextField('OFFICE_SERVER', @$OFFICE_SERVER, '192.168.1.50')?></td>
+				<td><?=installTextField('OFFICE_SERVER', $OFFICE_SERVER, '192.168.1.50')?></td>
 			</tr>
 			<tr>
 				<td>Username</td>
-				<td><?=installTextField('OFFICE_SERVER_USER', @$OFFICE_SERVER_USER, 'office')?></td>
+				<td><?=installTextField('OFFICE_SERVER_USER', $OFFICE_SERVER_USER, 'office')?></td>
 			</tr>
 			<tr>
 				<td>Password</td>
-				<td><?=installTextField('OFFICE_SERVER_PW', @$OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('OFFICE_SERVER_PW', $OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
 			</tr>
 			<tr>
 				<td>Database</td>
-				<td><?=installTextField('OFFICE_OP_DB', @$OFFICE_OP_DB, 'office_opdata')?></td>
+				<td><?=installTextField('OFFICE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
 			</tr>
 			<tr>
 				<td>Office URL Base</td>
-				<td><?=installTextField('OFFICE_SERVER_URL_BASE', @$OFFICE_SERVER_URL_BASE, 'office')?></td>
+				<td><?=installTextField('OFFICE_SERVER_URL_BASE', $OFFICE_SERVER_URL_BASE, 'office')?></td>
 			</tr>
 		</table>
 		<button type="submit">Update Now!</button>
 	</form>
 
 <?php
-	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING);
-	ini_set('display_errors', 1);
-	ini_set('log_errors', 0);
-	ini_set('error_log', '/dev/null');
+	if ($is_cron) {
+		ob_end_clean();
+	}
+	else {
+		flush();
+	}
 
+	$allowed_params = array(
+			'OFFICE_SERVER_URL_BASE' => null,
+			'OFFICE_SERVER' => null,
+			'OFFICE_SERVER_USER' => null,
+			'OFFICE_SERVER_PW' => null,
+			'OFFICE_OP_DB' => null,
+			'coop_host' => null,
+			'coop_user' => null,
+			'coop_pw' => null,
+			'coop_member_db' => null,
+			'coop_product_db' => null,
+			'xfer_members' => null,
+			'xfer_products' => null,
+		);
 	if (count($_POST))
 		$invoke_params = $_POST;
-	elseif (in_array($_SERVER['argv'], $_SERVER['PHP_SELF'])) {
-		$invoke_params = $_SERVER['argv'];
-		unset($invoke_params[0]);
+	elseif (in_array($_SERVER['PHP_SELF'], $_SERVER['argv'])) {
+		$allowed_params['sync_lanes'] = null;
+		$invoke_params = array_flip($_SERVER['argv']);
+		unset($invoke_params[$_SERVER['PHP_SELF']]);
 	}
 
 	if (isset($invoke_params)) {
-		$allowed_params = array(
-				'OFFICE_SERVER_URL_BASE' => null,
-				'OFFICE_SERVER' => null,
-				'OFFICE_SERVER_USER' => null,
-				'OFFICE_SERVER_PW' => null,
-				'OFFICE_OP_DB' => null,
-				'coop_host' => null,
-				'coop_user' => null,
-				'coop_pw' => null,
-				'coop_member_db' => null,
-				'coop_product_db' => null,
-				'xfer_members' => null,
-				'xfer_products' => null,
-			);
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
 		extract($invoke_params);
-		$sync_lanes = in_array($_SERVER['argv'], 'sync_lanes');
 		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
 
+		echo "Connecting with `{$OFFICE_OP_DB}`...{$lf}";
 		$office_dsn = "mysql:dbname={$OFFICE_OP_DB};host={$OFFICE_SERVER};charset=utf8";
 		try {
 			$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
 			$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 		} catch (PDOException $e) {
-			echo 'Office connection failed: ' . $e->getMessage();
+			echo 'Office connection failed: ' . $e->getMessage() . $lf;
 		}
+		echo $hr.$lf;
 
 		if ($xfer_members) {
+			echo "Connecting with `{$coop_member_db}`...{$lf}";
 			$coop_members_dsn = "mysql:dbname={$coop_member_db};host={$coop_host};charset=utf8";
 			try {
 				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw);
 				$coop_members_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$coop_members_dsn}) failed: " . $e->getMessage();
+				echo "Co-op connection ({$coop_members_dsn}) failed: " . $e->getMessage() . $lf;
 			}
 
 			$coop_members_q = $coop_members_db->query('SELECT * FROM MembersForIS4C');
@@ -254,8 +288,8 @@
 
 				if ($r && $s && $t) {
 					echo '.';
-					if (++$i % 500 === 0) {
-						echo "<br>\n";
+					if (++$i % $line_length === 0) {
+						echo $lf;
 						flush();
 					}
 				}
@@ -273,8 +307,8 @@
 					reportInsertError($office_custdata_q, $office_nonmember);
 				if ($r) {
 					echo ',';
-					if (++$i % 500 === 0) {
-						echo "<br>\n";
+					if (++$i % $line_length === 0) {
+						echo $lf;
 						flush();
 					}
 				}
@@ -290,26 +324,28 @@
 				if ($sync_lanes) {
 					$data = file_get_contents('http:' . $url);
 					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+					if ($is_cron) {
+						echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
+					}
 				}
+				elseif (!$is_cron) {
 ?>
 				<br>
 				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?			}
-?>			
-			<br>
-			<br>
-			<br>
-<?
+<?				}
+			}
+			echo $lf.$hr.$lf;
 			flush();
 		}
 
 		if ($xfer_products) {
+			echo "Connecting with `{$coop_product_db}`...{$lf}";
 			$coop_products_dsn = "mysql:dbname={$coop_product_db};host={$coop_host};charset=utf8";
 			try {
 				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw);
 				$coop_products_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$coop_products_dsn}) failed: " . $e->getMessage();
+				echo "Co-op connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
 
 			$coop_products_q = $coop_products_db->query('SELECT * FROM CoopProductsForIS4C');
@@ -369,14 +405,15 @@
 
 				if ($r) {
 					echo '.';
-					if (++$i % 500 === 0) {
-						echo "<br>\n";
+					if (++$i % $line_length === 0) {
+						echo $lf;
 						flush();
 					}
 				}
 				elseif ((++$e >= 5) && ($e > $i * 5))
 					die;
 			}
+
 			$product_sync_urls = array(
 					'products' => 'Synchronize Products to Lanes',
 				);
@@ -385,16 +422,17 @@
 				if ($sync_lanes) {
 					$data = file_get_contents('http:' . $url);
 					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+					if ($is_cron) {
+						echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
+					}
 				}
+				elseif (!$is_cron) {
 ?>
 				<br>
 				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?			}
-?>			
-			<br>
-			<br>
-			<br>
-<?
+<?				}
+			}
+			echo $lf.$hr.$lf;
 			flush();
 		}
 	}
@@ -404,6 +442,7 @@
 		$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
 		$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
 		$lane_up = $lane_loss < 50;
+
 		$lane_status = $lane_up? 'UP' : 'DOWN';
 		if ($lane_up && strlen($OFFICE_SERVER_PW)) {
 			$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
@@ -430,22 +469,31 @@
 				}
 				$lane_db = null;
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$lane_db}) failed: " . $e->getMessage();
+				echo "Co-op connection ({$lane_db}) failed: " . $e->getMessage() . $lf;
 				$lane_status = '(ERROR)';
 			}
 		}
-		echo "Lane {$i} ({$lane_ip}): <b style=\"color:";
-		echo ($lane_up? 'green">'.$lane_status : 'red">DOWN');
-		echo "</b><br>\n";
+		if ($is_cron)
+			$lane_status_tag = '';
+		elseif ($lane_up)
+			$lane_status_tag = '<b style="color:green">';
+		else
+			$lane_status_tag = '<b style="color:red">';
+		$lane_status_tag_end = (strlen($lane_status_tag)? '</b>' : '');
+		echo "Lane {$i} ({$lane_ip}): {$lane_status_tag}{$lane_status}{$lane_status_tag_end}{$lf}";
 		flush();
 	}
+	if ($is_cron) {
+		@file_put_contents('.update_office.done', date('Y-m-d H:i:s'));
+	}
+	else {
 ?>
 </body>
+<?
+	}
 
 
-<?php
-
-function installTextField($name, $current_val, $default='', $bool=false, $html_vals=array())
+function installTextField($name, &$current_val, $default='', $bool=false, $html_vals=array())
 {
 	static $ini;
 	if (!isset($ini)) {
@@ -458,9 +506,13 @@ function installTextField($name, $current_val, $default='', $bool=false, $html_v
 		}
 	}
 
+	if (is_null($current_val)) {
+		$current_val = @$ini[$name] ?: $default;
+	}
+
 	$html_vals['type'] = @$html_vals['type']?: 'text';
 	$html_vals['name'] = @$html_vals['name']?: $name;
-	$html_vals['value'] = @$html_vals['value']?: @$_POST[$name]?: $current_val?: @$ini[$name]?: $default;
+	$html_vals['value'] = @$html_vals['value']?: @$_POST[$name]?: $current_val;
 
 	return '<input type="'.$html_vals['type'].'" name="'.$html_vals['name'].'" value="'.$html_vals['value'].'" />';
 }
@@ -517,5 +569,3 @@ function textASCII($text_utf8)
 // 	echo "<span style=\"color:green\">“".($text_ascii)."”</span><br>\n";
 	return $text_ascii;
 }
-
-
