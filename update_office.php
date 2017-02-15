@@ -269,18 +269,18 @@
 
 			flush();
 			while ($coop_member = $coop_members_q->fetch(PDO::FETCH_ASSOC)) {
-				$params = $office_custdata_params = $office_meminfo_params = array();
+				$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = array();
 				foreach ($coop_member as $column => $value) {
-					$params[':'.$column] = $value;
+					$member_details[':'.$column] = $value;
 				}
 
 				// Make member name safe for current CORE-POS charset limitations
-				$params[':last_name'] = textASCII($params[':last_name']);
-				$params[':first_name'] = textASCII($params[':first_name']);
+				$member_details[':last_name'] = textASCII($member_details[':last_name']);
+				$member_details[':first_name'] = textASCII($member_details[':first_name']);
 
-				$office_custdata_params = array_intersect_key($params, $office_custdata_paramlist);
-				$office_meminfo_params = array_intersect_key($params, $office_meminfo_paramlist);
-				$office_memdates_params = array_intersect_key($params, $office_memdates_paramlist);
+				$office_custdata_params = array_intersect_key($member_details, $office_custdata_paramlist);
+				$office_meminfo_params = array_intersect_key($member_details, $office_meminfo_paramlist);
+				$office_memdates_params = array_intersect_key($member_details, $office_memdates_paramlist);
 
 				if (!($r = $office_custdata_q->execute($office_custdata_params)))
 					reportInsertError($office_custdata_q, $office_custdata_params);
@@ -395,17 +395,17 @@
 
 			flush();
 			while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
-				$params = array();
+				$coop_products_params = array();
 				foreach ($coop_product as $column => $value) {
-					$params[':'.$column] = $value;
+					$coop_products_params[':'.$column] = $value;
 				}
 
 				// Make brand and description safe for current CORE-POS charset limitations
-				$params[':brand'] = textASCII($params[':brand']);
-				$params[':description'] = textASCII($params[':description']);
+				$coop_products_params[':brand'] = textASCII($coop_products_params[':brand']);
+				$coop_products_params[':description'] = textASCII($coop_products_params[':description']);
 
-				if (!($r = $office_products_q->execute($params)))
-					reportInsertError($office_products_q, $params);
+				if (!($r = $office_products_q->execute($coop_products_params)))
+					reportInsertError($office_products_q, $coop_products_params);
 
 				if ($r) {
 					echo '.';
