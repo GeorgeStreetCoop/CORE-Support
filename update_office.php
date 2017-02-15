@@ -133,6 +133,7 @@
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
 		extract($invoke_params);
 		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
+		$asof_date = 'as of '.date('M j Y g:ia');
 
 		echo "Connecting with `{$OFFICE_OP_DB}`...{$lf}";
 		$office_dsn = "mysql:dbname={$OFFICE_OP_DB};host={$OFFICE_SERVER};charset=utf8";
@@ -303,7 +304,7 @@
 			$office_nonmembers = array(
 					array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'as of '.date('M j Y g:ia'), ':first_name' => '', ':modified' => 0),
+					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
 				);
 			foreach ($office_nonmembers as $office_nonmember) {
 				if (!($r = $office_custdata_q->execute($office_nonmember)))
@@ -415,6 +416,22 @@
 				}
 				elseif ((++$e >= 5) && ($e > $i * 5))
 					die;
+			}
+
+			// Add non-product POS lookups
+			$office_nonproducts = array(
+					array(':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111),
+				);
+			foreach ($office_nonproducts as $office_nonproduct) {
+				if (!($r = $office_products_q->execute($office_nonproduct)))
+					reportInsertError($office_products_q, $office_nonproduct);
+				if ($r) {
+					echo ',';
+					if (++$i % $line_length === 0) {
+						echo $lf;
+						flush();
+					}
+				}
 			}
 
 			$product_sync_urls = array(
