@@ -9,6 +9,8 @@
 	ini_set('log_errors', 0);
 	ini_set('error_log', '/dev/null');
 
+	set_time_limit(60);
+
 	$OFFICE_SERVER_URL_BASE = null;
 	$OFFICE_SERVER = null;
 	$OFFICE_SERVER_USER = null;
@@ -269,6 +271,8 @@
 
 			flush();
 			while ($coop_member = $coop_members_q->fetch(PDO::FETCH_ASSOC)) {
+				set_time_limit(60);
+
 				$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = array();
 				foreach ($coop_member as $column => $value) {
 					$member_details[':'.$column] = $value;
@@ -395,6 +399,8 @@
 
 			flush();
 			while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
+				set_time_limit(60);
+
 				$coop_products_params = array();
 				foreach ($coop_product as $column => $value) {
 					$coop_products_params[':'.$column] = $value;
