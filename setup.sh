@@ -125,7 +125,7 @@ fi
 . "$SUPPORT/setup_serial.sh"
 
 
-# set up ssd, including boot process
+# set up xwindows, including boot process
 . "$SUPPORT/setup_xwindows.sh"
 
 
