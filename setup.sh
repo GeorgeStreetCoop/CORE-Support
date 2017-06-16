@@ -107,6 +107,9 @@ ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
 # set up network
 . "$SUPPORT/setup_network.sh"
 
+# set up PHP
+. "$SUPPORT/setup_php.sh"
+
 
 # set up lane URL
 ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane"
