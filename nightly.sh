@@ -44,3 +44,7 @@ php ../CORE-POS/fannie/classlib2.0/FannieTask.php ProductSummarizeLastQuarter
 
 # dlog_90_view -> CashPerformDay, CashPerformDay_cache, reportDataCache, batchMergeTable, shelftags, 
 php ../CORE-POS/fannie/classlib2.0/FannieTask.php ReportDataCacheTask
+
+
+# clear out unneeded lane data (mostly translog.localtrans)
+php ../CORE-POS/fannie/classlib2.0/FannieTask.php LaneTrimTask
