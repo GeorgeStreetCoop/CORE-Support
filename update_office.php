@@ -101,7 +101,7 @@
 	</form>
 	<br>
 
-<?php
+<?
 	if ($is_cron) {
 		ob_end_clean();
 	}
