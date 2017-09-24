@@ -310,7 +310,7 @@
 					array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
+					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
 				);
 			foreach ($office_nonmembers as $office_nonmember) {
 				if (!($r = $office_custdata_q->execute($office_nonmember)))
@@ -358,7 +358,7 @@
 				echo "Co-op connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
 
-			$coop_products_q = $coop_products_db->query('SELECT * FROM CoopProductsForIS4C');
+			$coop_products_q = $coop_products_db->query('SELECT * FROM ProductsForIS4C');
 
 			$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
 			$office_products_q = $office_db->prepare('
