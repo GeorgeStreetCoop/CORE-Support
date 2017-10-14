@@ -566,6 +566,8 @@ function textASCII($text_utf8)
 			'n' => 'ñ',
 			'o' => 'óôøö',
 			'u' => 'úûü',
+			"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
+			'"' => '“”″',
 		);
 	static $map;
 
