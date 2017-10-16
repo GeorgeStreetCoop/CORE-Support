@@ -40,5 +40,5 @@ sed -i '$a 192.168.1.53    lane3' /etc/hosts
 
 
 # set up mysql for network use
-sed -i "/bind-address/s/\(= *\).*\$/\1${LANEIP}/" /etc/mysql/my.cnf
+sed -i "/bind-address/s/\(= *\).*\$/\10.0.0.0/" /etc/mysql/my.cnf
 sed -i '/skip-networking/s/^\( *skip-networking\)/# \1/' /etc/mysql/my.cnf
