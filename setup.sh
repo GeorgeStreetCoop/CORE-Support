@@ -135,6 +135,9 @@ fi
 # set up xwindows, including boot process
 . "$SUPPORT/setup_xwindows.sh"
 
+# start xwindows (depends on setup_xwindows.sh settings)
+nohup startx > /dev/null
+
 
 # set up user "cashier" (runs as that user ID)
 su -c "$SUPPORT/setup_user.sh" - cashier
