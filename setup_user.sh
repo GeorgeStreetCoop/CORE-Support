@@ -2,7 +2,7 @@
 # run this script as regular user!
 
 # exit if we're creating a backend-only setup
-if [ $LANENUMBER -eq 0 ]; then
+if [ "$LANENUMBER" == 0 ]; then
 	echo "This is not a POS lane; skipping user setup."
 	return
 fi
