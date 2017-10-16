@@ -7,3 +7,4 @@ ttf-mscorefonts-installer
 numlockx
 openssh-server
 usbmount
+phpmyadmin
