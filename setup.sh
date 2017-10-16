@@ -107,6 +107,10 @@ ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
 # set up network
 . "$SUPPORT/setup_network.sh"
 
+# start mysql (depends on setup_network.sh settings)
+service mysql start
+
+
 # set up PHP
 . "$SUPPORT/setup_php.sh"
 
