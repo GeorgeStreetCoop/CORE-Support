@@ -42,6 +42,9 @@ GRANT SELECT, INSERT, CREATE, DROP, ALTER, LOCK TABLES
 ON core_opdata.*
 TO office@'192.168.1.%';
 
+GRANT SELECT
+ON core_translog.*
+TO office@'192.168.1.%';
 
 USE core_translog;
 

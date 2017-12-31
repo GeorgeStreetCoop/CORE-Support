@@ -2,7 +2,7 @@
 # run this script under sudo!
 
 # exit if we're creating a backend-only setup
-if [ $LANENUMBER -eq 0 ]; then
+if [ "$LANENUMBER" == 0 ]; then
 	echo "This is not a POS lane; skipping serial port setup."
 	return
 fi
