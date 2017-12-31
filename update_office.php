@@ -15,18 +15,19 @@
 	$OFFICE_SERVER = null;
 	$OFFICE_SERVER_USER = null;
 	$OFFICE_SERVER_PW = null;
-	$OFFICE_OP_DB = null;
+	$OFFICE_OP_DBNAME = null;
 	$coop_host = null;
 	$coop_user = null;
 	$coop_pw = null;
-	$coop_member_db = null;
-	$coop_product_db = null;
+	$coop_member_dbname = null;
+	$coop_products_dbname = null;
 
 	if ($is_cron) {
-		echo "Running as cron!";
+		echo "Running as command line or cron";
 		echo $lf.$hr.$lf;
 		ob_start();
 	}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -44,36 +45,10 @@
 <body>
 
 	<form method="post">
+
 		<table>
 			<tr>
-				<td colspan="3"><h3>Source Databases: Co-op Members and Products</h3></td>
-			</tr>
-			<tr>
-				<td colspan="2">Host</td>
-				<td><?=installTextField('coop_host', $coop_host, 'georgestreetcoop.com')?></td>
-			</tr>
-			<tr>
-				<td colspan="2">Username</td>
-				<td><?=installTextField('coop_user', $coop_user, 'geor5702_backup')?></td>
-			</tr>
-			<tr>
-				<td colspan="2">Password</td>
-				<td><?=installTextField('coop_pw', $coop_pw, '', true, array('type'=>'password'))?></td>
-			</tr>
-			<tr>
-				<td>Member Database</td>
-				<td><input type="checkbox" name="xfer_members"></td>
-				<td><?=installTextField('coop_member_db', $coop_member_db, 'geor5702_members')?></td>
-			</tr>
-			<tr>
-				<td>Product Database</td>
-				<td><input type="checkbox" name="xfer_products"></td>
-				<td><?=installTextField('coop_product_db', $coop_product_db, 'geor5702_products')?></td>
-			</tr>
-		</table>
-		<table>
-			<tr>
-				<td colspan="2"><h3>Destination Database: CORE-POS</h3></td>
+				<td colspan="2"><h3>Office Database: CORE-POS</h3></td>
 			</tr>
 			<tr>
 				<td>Host</td>
@@ -89,13 +64,57 @@
 			</tr>
 			<tr>
 				<td>Database</td>
-				<td><?=installTextField('OFFICE_OP_DB', $OFFICE_OP_DB, 'office_opdata')?></td>
+				<td><?=installTextField('OFFICE_OP_DBNAME', $OFFICE_OP_DBNAME, 'office_opdata')?></td>
 			</tr>
 			<tr>
 				<td>Office URL Base</td>
 				<td><?=installTextField('OFFICE_SERVER_URL_BASE', $OFFICE_SERVER_URL_BASE, 'office')?></td>
 			</tr>
 		</table>
+
+		<table>
+			<tr>
+				<td colspan="3"><h3>Web Databases: Co-op Members and Products</h3></td>
+			</tr>
+			<tr>
+				<td>Host</td>
+				<td><?=installTextField('coop_host', $coop_host, 'georgestreetcoop.com')?></td>
+			</tr>
+			<tr>
+				<td>Username</td>
+				<td><?=installTextField('coop_user', $coop_user, 'geor5702_COREPOS')?></td>
+			</tr>
+			<tr>
+				<td>Password</td>
+				<td><?=installTextField('coop_pw', $coop_pw, '', true, array('type'=>'password'))?></td>
+			</tr>
+			<tr>
+				<td>Member Database</td>
+				<td><?=installTextField('coop_member_dbname', $coop_member_dbname, 'geor5702_members')?></td>
+				<td><input type="checkbox" name="xfer_members"> Members</td>
+			</tr>
+			<tr>
+				<td>Product Database</td>
+				<td><?=installTextField('coop_product_dbname', $coop_products_dbname, 'geor5702_products')?></td>
+				<td><input type="checkbox" name="xfer_products"> Products</td>
+				<td><input type="checkbox" name="xfer_sales"> Sales</td>
+			</tr>
+		</table>
+
+		<table>
+			<tr>
+				<td colspan="2"><h3>Date Range (for Sales Stats)</h3></td>
+			</tr>
+			<tr>
+				<td>Start Date</td>
+				<td><?=installTextField('start_date', $start_date, date('Y-m-d', strtotime('-21 day')), array('type'=>'date'))?><!-- <small><i>(this date will be included)</i></small>--></td>
+			</tr>
+			<tr>
+				<td>End Date</td>
+				<td><?=installTextField('end_date', $end_date, date('Y-m-d'), array('type'=>'date'))?><!-- <small><i>(this date will <u>not</u> be included)</i></small>--></td>
+			</tr>
+		</table>
+
 		<button type="submit">Update Now!</button>
 		<br>
 	</form>
@@ -114,14 +133,17 @@
 			'OFFICE_SERVER' => null,
 			'OFFICE_SERVER_USER' => null,
 			'OFFICE_SERVER_PW' => null,
-			'OFFICE_OP_DB' => null,
+			'OFFICE_OP_DBNAME' => null,
 			'coop_host' => null,
 			'coop_user' => null,
 			'coop_pw' => null,
-			'coop_member_db' => null,
-			'coop_product_db' => null,
+			'coop_member_dbname' => null,
+			'coop_product_dbname' => null,
 			'xfer_members' => null,
 			'xfer_products' => null,
+			'xfer_sales' => null,
+			'start_date' => null,
+			'end_date' => null,
 		);
 	if (count($_POST))
 		$invoke_params = $_POST;
@@ -137,19 +159,21 @@
 		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
 		$asof_date = 'as of '.date('M j Y g:ia');
 
-		echo "Connecting with `{$OFFICE_OP_DB}`...{$lf}";
-		$office_dsn = "mysql:dbname={$OFFICE_OP_DB};host={$OFFICE_SERVER};charset=utf8";
-		try {
-			$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
-			$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
-		} catch (PDOException $e) {
-			echo 'Office connection failed: ' . $e->getMessage() . $lf;
+		if ($xfer_members || $xfer_products || $xfer_sales) {
+			echo "Connecting with `{$OFFICE_OP_DBNAME}`...{$lf}";
+			$office_dsn = "mysql:dbname={$OFFICE_OP_DBNAME};host={$OFFICE_SERVER};charset=utf8";
+			try {
+				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
+				$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
+			} catch (PDOException $e) {
+				echo 'Office connection failed: ' . $e->getMessage() . $lf;
+			}
+			echo $hr.$lf;
 		}
-		echo $hr.$lf;
 
 		if ($xfer_members) {
-			echo "Connecting with `{$coop_member_db}`...{$lf}";
-			$coop_members_dsn = "mysql:dbname={$coop_member_db};host={$coop_host};charset=utf8";
+			echo "Connecting with `{$coop_member_dbname}`...{$lf}";
+			$coop_members_dsn = "mysql:dbname={$coop_member_dbname};host={$coop_host};charset=utf8";
 			try {
 				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw);
 				$coop_members_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
@@ -348,16 +372,18 @@
 			flush();
 		}
 
-		if ($xfer_products) {
-			echo "Connecting with `{$coop_product_db}`...{$lf}";
-			$coop_products_dsn = "mysql:dbname={$coop_product_db};host={$coop_host};charset=utf8";
+		if ($xfer_products || $xfer_sales) {
+			echo "Connecting with `{$coop_products_dbname}`...{$lf}";
+			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
 			try {
 				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw);
 				$coop_products_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
 				echo "Co-op connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
+		}
 
+		if ($xfer_products) {
 			$coop_products_q = $coop_products_db->query('SELECT * FROM ProductsForIS4C');
 
 			$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
@@ -463,6 +489,145 @@
 			echo $lf.$hr.$lf;
 			flush();
 		}
+
+
+		if ($xfer_sales) {
+			$sales_start_time = microtime(1);
+			$sales_fetch_q = $office_db->prepare('
+					SELECT
+						DATE_FORMAT(datetime, "%Y-%m-%d") SaleDate,
+						DATE_FORMAT(datetime, "%Y-%m-%d %a") SaleDateNice,
+						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
+								CONCAT("9999999999", department), -- open rings
+								upc -- regular items
+							) UPC,
+						department Department,
+						SUM(quantity) ItemCount,
+						SUM(total) GrossPrice,
+						SUM(total * IF(discountable = 1, (percentDiscount - IF(memtype >= 10, 5, 0)) * 0.01, 0)) MemberDiscount,
+						SUM(total * IF(memtype >= 10 AND discountable = 1, 0.05, 0)) SeniorDiscount
+					FROM office_trans_archive.bigArchive
+					WHERE register_no != 99
+						AND emp_no != 9999
+						AND trans_status NOT IN ("D", "X", "Z")
+						AND (( -- regular items
+							upc REGEXP "^[0-9]+$"
+							AND upc > 0
+							AND department > 0
+						) OR ( -- open rings; UPC will be made up of 9999999999 prepended to dept ID
+							upc REGEXP "^-?[0-9.]+DP+[0-9]+$"
+						))
+						AND datetime
+							BETWEEN :start_date
+							AND (:end_date + INTERVAL 1 DAY) -- expand endpoint to end-of-day
+					GROUP BY
+						DATE_FORMAT(datetime, "%Y-%m-%d"),
+						upc
+				');
+			$params = array(
+					':start_date' => $start_date,
+					':end_date' => $end_date,
+				);
+			$r = $sales_fetch_q->execute($params);
+			$sales_fetch_q->bindColumn('SaleDate', $sale_date);
+			$sales_fetch_q->bindColumn('SaleDateNice', $sale_date_nice);
+			$sales_fetch_q->bindColumn('UPC', $upc);
+			$sales_fetch_q->bindColumn('Department', $department);
+			$sales_fetch_q->bindColumn('ItemCount', $item_count);
+			$sales_fetch_q->bindColumn('GrossPrice', $gross_price);
+			$sales_fetch_q->bindColumn('MemberDiscount', $member_discount);
+			$sales_fetch_q->bindColumn('SeniorDiscount', $senior_discount);
+
+			if (!$r) {
+				echo "{$lf}— error querying CORE-POS: " . $sales_fetch_q->errorInfo()[2] . $lf;
+			}
+			else {
+				$sales_clear_q = $coop_products_db->prepare('
+						DELETE FROM ProductSales
+						WHERE SaleDate BETWEEN :start_date AND :end_date
+					');
+				$r = $sales_clear_q->execute($params);
+				if (!$r) {
+					echo "{$lf}— error clearing date range in sales table: " . $sales_clear_q->errorInfo()[2] . $lf;
+				}
+
+				while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND)) {
+					if ($header_sale_date != $sale_date) {
+						if ($header_sale_date) {
+							$block .= join(',', $blocks);
+							$r = $coop_products_db->exec($block);
+							if (!$r) {
+								echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
+							}
+							else {
+								$date_gross = '$'.number_format($date_gross, 2);
+								$date_net = '$'.number_format($date_net, 2);
+								$date_reported_gross = '$'.number_format($date_reported_gross, 2);
+								$date_reported_net = '$'.number_format($date_reported_net, 2);
+								echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
+								$total_records += $date_records;
+							}
+						}
+						$header_sale_date = $sale_date;
+						$block = "REPLACE ProductSales\n";
+						$block .= "\t(UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
+						$block .= "VALUES";
+						$blocks = array();
+
+						echo $sale_date_nice;
+						flush();
+						usleep(1000);
+						set_time_limit(60);
+						$date_records = $date_gross = $date_net = $date_reported_gross = $date_reported_net = 0;
+					}
+					$upc_corrected = $upc . getCheckDigit($upc);
+					$upcs_changed += ($upc_corrected === $upc? 0 : 1);
+
+					if ($date_records++ % 5 === 0)
+						echo '.';
+					$date_gross += $gross_price;
+					$date_net += $gross_price - $member_discount - $senior_discount;
+					switch ($department) {
+						case 101:
+						case 102:
+						case 103:
+						case 105:
+						case 106:
+						case 108:
+						case 112:
+						case 113:
+						case 114:
+							$date_reported_gross += $gross_price;
+							$date_reported_net += $gross_price - $member_discount - $senior_discount;
+					}
+
+					$blocks[] = "\n\t({$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
+				}
+				if ($header_sale_date) {
+					$block .= join(',', $blocks);
+					$r = $coop_products_db->exec($block);
+					if (!$r) {
+						echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
+					}
+					else {
+						$date_gross = '$'.number_format($date_gross, 2);
+						$date_net = '$'.number_format($date_net, 2);
+						$date_reported_gross = '$'.number_format($date_reported_gross, 2);
+						$date_reported_net = '$'.number_format($date_reported_net, 2);
+						echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
+						$total_records += $date_records;
+					}
+				}
+
+				$sales_end_time = microtime(1);
+				$total_duration = number_format($sales_end_time - $sales_start_time, 3);
+				$overall_rate = number_format($total_records / ($sales_end_time - $sales_start_time), 3);
+				$total_records = number_format($total_records);
+				$upcs_changed = number_format($upcs_changed);
+				echo "{$lf}Exported {$total_records} total records (adding {$upcs_changed} checksums) in {$total_duration} seconds, {$overall_rate} records/second average.{$lf}";
+			}
+
+		}
 	}
 
 	for ($i = 1; $i <= 3; $i++) {
@@ -543,6 +708,21 @@ function installTextField($name, &$current_val, $default='', $bool=false, $html_
 	$html_vals['value'] = @$html_vals['value']?: @$_POST[$name]?: $current_val;
 
 	return '<input type="'.$html_vals['type'].'" name="'.$html_vals['name'].'" value="'.$html_vals['value'].'" />';
+}
+
+function getCheckDigit($upc)
+{
+	if (!is_string($upc)) { echo '$'; return; };
+	if (!ctype_digit($upc)) { echo '#'; return; };
+	if (substr($upc, 0, 9) === '999999999') { echo ''; return; };
+	if ($upc <= 99999) { echo ''; return; };
+
+	$upc = str_pad($upc, 13, '0', STR_PAD_LEFT);
+
+	for ($i = 0; $i < strlen($upc); $i++) {
+		$sum += $upc[$i] * ($i % 2? 1 : 3);
+	}
+	return (400 - $sum) % 10;
 }
 
 function reportInsertError($query, $params)
