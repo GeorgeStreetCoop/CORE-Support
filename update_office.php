@@ -740,11 +740,12 @@ function textASCII($text_utf8)
 {
 	static $map_alphabetics = array(
 			'a' => 'áâåäā',
-			'c' => 'ç',
+			'c' => 'çć',
 			'e' => 'éêë',
 			'i' => 'íîï',
 			'n' => 'ñ',
 			'o' => 'óôøö',
+			's' => 'š',
 			'u' => 'úûü',
 			"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
 			'"' => '“”″',
