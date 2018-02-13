@@ -120,7 +120,7 @@
 	</form>
 	<br>
 
-<?
+<?php
 	if ($is_cron) {
 		ob_end_clean();
 	}
@@ -366,7 +366,8 @@
 ?>
 				<br>
 				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?				}
+<?php
+				}
 			}
 			echo $lf.$hr.$lf;
 			flush();
@@ -484,7 +485,8 @@
 ?>
 				<br>
 				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?				}
+<?php
+				}
 			}
 			echo $lf.$hr.$lf;
 			flush();
@@ -682,7 +684,7 @@
 	else {
 ?>
 </body>
-<?
+<?php
 	}
 
 
