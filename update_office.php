@@ -741,14 +741,14 @@ function reportInsertError($query, $params)
 function textASCII($text_utf8)
 {
 	static $map_alphabetics = array(
-			'a' => 'áâåäā',
+			'a' => 'áâåäāà',
 			'c' => 'çć',
-			'e' => 'éêë',
+			'e' => 'éêëè',
 			'i' => 'íîï',
 			'n' => 'ñ',
 			'o' => 'óôøö',
 			's' => 'š',
-			'u' => 'úûü',
+			'u' => 'úûüù',
 			"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
 			'"' => '“”″',
 		);
