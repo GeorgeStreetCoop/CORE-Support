@@ -69,7 +69,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
 	mkdir -p "$COREPOS" 2>/dev/null
 	cd "$COREPOS"
-	git clone https://github.com/GeorgeStreetCoop/CORE-POS.git "$COREPOS"
+	git clone https://github.com/CORE-POS/IS4C.git "$COREPOS"
 else
 	if [ ! -d "$COREPOS" ]; then
 		echo "Directory '$COREPOS' doesn't exist. Aborting lane install. Try again with 'rm' override parameter?" >&2
