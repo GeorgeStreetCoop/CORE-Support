@@ -2,7 +2,7 @@ git
 xorg
 slim
 openbox
-firefox
+surf
 ttf-mscorefonts-installer
 numlockx
 openssh-server
