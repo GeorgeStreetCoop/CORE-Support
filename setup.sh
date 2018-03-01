@@ -124,6 +124,9 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 if [ "$LANENUMBER" -gt 0 ]; then
 	echo 'When prompted below, please enter your mysql ROOT password...'
 	mysql -u root -p --force < "$SUPPORT/setup_db.sql"
+
+	HOST_IP=`hostname -I`
+	echo "TODO: set 'bind-address = $HOST_IP' in /etc/mysql/mysql.conf.d/mysqld.cnf"
 fi
 
 
