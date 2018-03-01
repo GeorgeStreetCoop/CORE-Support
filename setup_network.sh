@@ -10,7 +10,7 @@ if [ -z "$COREPOS" ]; then
 fi
 
 
-# set up static IP from hstname lane number and IP address
+# set up static IP from hostname lane number and IP address
 # 2016-01-02: commented out as seems to break networking entirely; reserved DHCP is sufficient.
 ## use hostname ("lane#") to determine IP address
 ## LANEID=`hostname`

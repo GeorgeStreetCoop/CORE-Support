@@ -36,10 +36,6 @@ while [ -z "$LANEPASSWORD" ]; do
 done
 
 
-# install LAMP stack
-tasksel install lamp-server
-
-
 # bootstrap git
 apt-get -y install git
 
@@ -55,8 +51,8 @@ else
 		return
 	fi
 	cd "$SUPPORT"
-	git reset --hard HEAD
-	git pull
+#	git reset --hard HEAD
+#	git pull
 fi
 chown -Rf cashier "$SUPPORT"
 
@@ -69,7 +65,7 @@ if [ -n "$1" -a "$1" = "rm" ]; then
 	rm -rf "$COREPOS"
 	mkdir -p "$COREPOS" 2>/dev/null
 	cd "$COREPOS"
-	git clone https://github.com/CORE-POS/IS4C.git "$COREPOS"
+	git clone https://github.com/CORE-POS/IS4C.git --branch version-2.7 "$COREPOS"
 else
 	if [ ! -d "$COREPOS" ]; then
 		echo "Directory '$COREPOS' doesn't exist. Aborting lane install. Try again with 'rm' override parameter?" >&2
@@ -95,9 +91,10 @@ fi
 # set up error logs
 touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
 chown www-data "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
-ln -svf "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log" "$SUPPORT"
-ln -svf /var/log/apache2/access.log "$SUPPORT/apache_access.log"
-ln -svf /var/log/apache2/error.log "$SUPPORT/apache_error.log"
+ln -svf "$COREPOS/pos/is4c-nf/log/php-errors.log" "$SUPPORT/php-errors.log"
+ln -svf "$COREPOS/pos/is4c-nf/log/queries.log" "$SUPPORT/php-queries.log"
+ln -svf /var/log/nginx/access.log "$SUPPORT/www-access.log"
+ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 
 
 # set up grub boot process
@@ -115,9 +112,11 @@ service mysql start
 . "$SUPPORT/setup_php.sh"
 
 
-# set up lane URL
-ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane"
-# prevent recursive link
+# set up webserver
+. "$SUPPORT/setup_nginx.sh"
+
+
+# prevent recursive links
 find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
@@ -136,7 +135,7 @@ fi
 . "$SUPPORT/setup_xwindows.sh"
 
 # start xwindows (depends on setup_xwindows.sh settings)
-nohup startx > /dev/null
+#nohup startx > /dev/null
 
 
 # set up user "cashier" (runs as that user ID)

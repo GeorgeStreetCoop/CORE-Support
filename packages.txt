@@ -1,10 +1,14 @@
+openssh-server
+usbmount
 git
+nginx
+mysql-server
+php5-fpm
+php-mysql
+phpmyadmin
 xorg
 slim
 openbox
 surf
 ttf-mscorefonts-installer
 numlockx
-openssh-server
-usbmount
-phpmyadmin
