@@ -58,5 +58,9 @@ PRIMARY KEY (id)
 
 TRUNCATE TABLE taxrates;
 
-INSERT taxrates ( id, rate, description )
-VALUES ( 1, 0.035, 'UEZ' );
+INSERT taxrates
+	( id, rate, description )
+VALUES
+	( 1, 0.06625, 'Tax' ),
+	( 2, 0.06625, 'UEZ' )
+;
