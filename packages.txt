@@ -3,7 +3,7 @@ usbmount
 git
 nginx
 mysql-server
-php5-fpm
+php-fpm
 php-mysql
 phpmyadmin
 xorg
