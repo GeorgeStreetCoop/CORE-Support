@@ -1,6 +1,6 @@
 ini-local.php
-apache_access.log
-apache_error.log
 php-errors.log
-queries.log
+php-queries.log
+www-access.log
+www-error.log
 /ssddir
