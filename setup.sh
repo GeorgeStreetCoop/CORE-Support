@@ -130,8 +130,8 @@ if [ "$LANENUMBER" -gt 0 ]; then
 fi
 
 
-# set up ssd, including boot process
-. "$SUPPORT/setup_serial.sh"
+# set up ssd boot process (systemd service since Ubuntu 15.04)
+. "$SUPPORT/setup_boot_systemd.sh"
 
 
 # set up xwindows, including boot process

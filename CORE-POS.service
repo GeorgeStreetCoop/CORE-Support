@@ -1,0 +1,13 @@
+[Unit]
+Description=CORE-POS serial port interfaces
+
+[Service]
+Type=forking
+WorkingDirectory=/CORE-Support/ssddir
+ExecStartPre=/bin/chmod 666 /dev/ttyS0 /dev/ttyS1
+ExecStartPre=/bin/stty 9600 oddp crtscts -F /dev/ttyS0
+ExecStart=/CORE-Support/ssddir/ssd
+PIDFile=/CORE-Support/ssddir/ssd.pid
+
+[Install]
+WantedBy=multi-user.target
