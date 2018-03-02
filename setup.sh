@@ -104,9 +104,6 @@ ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 # set up network
 . "$SUPPORT/setup_network.sh"
 
-# start mysql (depends on setup_network.sh settings)
-service mysql start
-
 
 # set up PHP
 . "$SUPPORT/setup_php.sh"
@@ -120,14 +117,8 @@ service mysql start
 find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
-# set up mysql users and basic data
-if [ "$LANENUMBER" -gt 0 ]; then
-	echo 'When prompted below, please enter your mysql ROOT password...'
-	mysql -u root -p --force < "$SUPPORT/setup_db.sql"
-
-	HOST_IP=`hostname -I`
-	echo "TODO: set 'bind-address = $HOST_IP' in /etc/mysql/mysql.conf.d/mysqld.cnf"
-fi
+# set up MySQL
+. "$SUPPORT/setup_mysql.sh"
 
 
 # set up ssd boot process (systemd service since Ubuntu 15.04)
