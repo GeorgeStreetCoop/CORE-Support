@@ -1,7 +1,7 @@
 <?php
 /*******************************************************************************
 
-    Copyright 2016 George Street Co-op
+    Copyright 2016, 2018 George Street Co-op
 
     This file is part of IT CORE.
 
@@ -21,26 +21,27 @@
 
 *********************************************************************************/
 
+namespace COREPOS\pos\lib\ReceiptBuilding\TenderReports;
+use COREPOS\pos\lib\Database;
+use COREPOS\pos\lib\ReceiptLib;
+
 /**
-  @class DefaultTenderReport
+  @class GeorgeStreetTenderReport
   Generate a tender report
 */
 class GeorgeStreetTenderReport extends TenderReport {
 
+static protected $print_handler;
+
+static public function setPrintHandler($ph)
+{
+    self::$print_handler = $ph;
+}
+
 /** 
  Print a tender report
-
- This tender report is based on a single tender tape view
- rather than multiple views (e.g. ckTenders, ckTenderTotal, etc).
- Which tenders to include is defined via checkboxes by the
- tenders on the install page's "extras" tab.
- 
- The only differences between this report and DefaultTenderReport are formatting:
- 1. Cash line items are omitted entirely; just the sum is shown
- 2. All items are shown in a less paper-intensive (more compact) format.
- 3. Cashier ID and timestamp are made bigger and book-end the report.
  */
-static public function get()
+static public function get($session)
 {
     $receipt = ReceiptLib::biggerFont("Transaction Summary")."\n\n";
     $receipt .= ReceiptLib::biggerFont(date('D M j Y - g:ia'))."\n\n";
@@ -48,7 +49,7 @@ static public function get()
 
 	$lane_db = Database::tDataConnect();
     if ($lane_db->isConnected('core_translog')) {
-	    $this_lane = CoreLocal::get('laneno');
+	    $this_lane = $session->get('laneno');
 		$transarchive = 'localtranstoday';
 		$opdata_dbname = 'core_opdata';
 		$report_params += array(
@@ -82,24 +83,24 @@ static public function get()
 		$receipt .= "\n";
 
 		$office_db = Database::tDataConnect();
-		$office_dbname = CoreLocal::get('tDatabase'); //'lane';
+		$office_dbname = $session->get('tDatabase'); //'lane';
 		$transarchive = 'localtrans';
 		$opdata_dbname = 'core_opdata';
 	}
 	else {
-		$office_host = CoreLocal::get('mServer');
+		$office_host = $session->get('mServer');
 		$office_ping = shell_exec("ping -q -t2 -c3 {$office_host}");
 		$office_live = (preg_match('~0 packets received~', $office_ping)? false : true);
 
 		if ($office_live) {
 			$office_db = Database::mDataConnect();
-			if (!$office_db->isConnected(CoreLocal::get('mDatabase'))) {
+			if (!$office_db->isConnected($session->get('mDatabase'))) {
 				$office_live = false;
 			}
 		}
 
 		if ($office_live) {
-			$office_dbname = CoreLocal::get('mDatabase'); //'office';
+			$office_dbname = $session->get('mDatabase'); //'office';
 			$transarchive = 'dtransactions';
 			$opdata_dbname = 'office_opdata';
 		}
@@ -111,7 +112,7 @@ static public function get()
 			$receipt .= "\n";
 
 			$office_db = Database::tDataConnect();
-			$office_dbname = CoreLocal::get('tDatabase'); //'lane';
+			$office_dbname = $session->get('tDatabase'); //'lane';
 			$transarchive = 'localtrans';
 			$opdata_dbname = 'core_opdata';
 		}
@@ -186,8 +187,6 @@ static public function get()
 	}
 
 	foreach ($report_params as $report => $query) {
-error_log("$report => $query");
-
 		$receipt .= "\n";
 
 		$receipt .= ReceiptLib::boldFont();
