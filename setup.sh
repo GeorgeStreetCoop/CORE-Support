@@ -40,7 +40,7 @@ done
 apt-get -y install git
 
 # get latest CORE-Support directory; if user specified "rm" argument, deletes old one
-if [ -n "$1" -a "$1" = "rm" ]; then
+if [ -n "$1" -a "$1" = "rm" ] || [ ! -d "$SUPPORT/.git" ]; then
 	rm -rf "$SUPPORT"
 	mkdir -p "$SUPPORT" 2>/dev/null
 	cd "$SUPPORT"
@@ -61,7 +61,7 @@ chown -Rf cashier "$SUPPORT"
 
 
 # get latest CORE-POS directory; if user specified "rm" argument, deletes old one
-if [ -n "$1" -a "$1" = "rm" ]; then
+if [ -n "$1" -a "$1" = "rm" ] || [ ! -d "$COREPOS/.git" ]; then
 	rm -rf "$COREPOS"
 	mkdir -p "$COREPOS" 2>/dev/null
 	cd "$COREPOS"
