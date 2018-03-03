@@ -19,7 +19,7 @@ fi
 
 
 # add George Street end-of-day report to "stock" versions
-ln -svf "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
+cp "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
 
 
 # create alias to rewrite TM-T88III NVRAM slot 1 with Co-op logo;
