@@ -23,7 +23,7 @@ if [ "$LANENUMBER" -gt 0 ]; then
 	# set 'bind-address = $HOST_IP' in /etc/mysql/mysql.conf.d/mysqld.cnf
 	HOST_IP=`hostname -I`
 	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf~
-	sed -i "s/^\s*#*\s*bind-address\(\s*=\s*\)127\.0\.0\.1\s*\$/bind-address\1${HOST_IP} # CORE-Support setup_mysql.sh/" /etc/mysql/mysql.conf.d/mysqld.cnf
+	sed -i "s/^\s*#*\s*bind-address\(\s*=\s*\)127\.0\.0\.1\s*\$/bind-address\t= ${HOST_IP} # CORE-Support setup_mysql.sh\nsql-mode\t= NO_ENGINE_SUBSTITUTION # CORE-Support setup_mysql.sh/" /etc/mysql/mysql.conf.d/mysqld.cnf
 fi
 
 
