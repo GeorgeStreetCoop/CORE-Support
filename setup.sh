@@ -93,8 +93,6 @@ touch "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/querie
 chown www-data "$COREPOS/pos/is4c-nf/log/php-errors.log" "$COREPOS/pos/is4c-nf/log/queries.log"
 ln -svf "$COREPOS/pos/is4c-nf/log/php-errors.log" "$SUPPORT/php-errors.log"
 ln -svf "$COREPOS/pos/is4c-nf/log/queries.log" "$SUPPORT/php-queries.log"
-ln -svf /var/log/nginx/access.log "$SUPPORT/www-access.log"
-ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 
 
 # set up grub boot process
@@ -111,6 +109,8 @@ ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 
 # set up webserver
 . "$SUPPORT/setup_nginx.sh"
+ln -svf /var/log/nginx/access.log "$SUPPORT/www-access.log"
+ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 
 
 # prevent recursive links
@@ -120,6 +120,10 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 # set up MySQL and create tables
 . "$SUPPORT/setup_mysql.sh"
 . "$SUPPORT/refresh_opdata.sh"
+
+
+# set up phpmyadmin and create tables
+. "$SUPPORT/setup_phpmyadmin.sh"
 
 
 # set up ssd boot process (systemd service since Ubuntu 15.04)
