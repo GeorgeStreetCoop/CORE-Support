@@ -140,6 +140,9 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 # set up George Street receipt formatting
 . "$SUPPORT/setup_receipt.sh"
 
+# set up George Street QuickMenus
+. "$SUPPORT/setup_quickmenus.sh"
+
 
 # set background image to Co-op logo
 if [ "$LANENUMBER" -gt 0 ]; then
