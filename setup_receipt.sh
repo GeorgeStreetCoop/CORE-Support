@@ -18,6 +18,10 @@ fi
 ## ln -svf "$SUPPORT/SimpleReceiptSavings.php" "$RECEIPTS/ReceiptSavings/"
 
 
+# use custom TenderReport.php which prepends tender report classpath to bare classnames
+# see http://github.com/CORE-POS/IS4C/issues/980
+cp "$SUPPORT/TenderReport.php" "$RECEIPTS/TenderReports/"
+
 # add George Street end-of-day report to "stock" versions
 cp "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
 
