@@ -143,6 +143,9 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 # set up George Street QuickMenus
 . "$SUPPORT/setup_quickmenus.sh"
 
+# set up any George Street code tweaks that aren't in master repo 
+. "$SUPPORT/setup_code_tweaks.sh"
+
 
 # set background image to Co-op logo
 if [ "$LANENUMBER" -gt 0 ]; then
