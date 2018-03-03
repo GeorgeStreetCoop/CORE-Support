@@ -117,8 +117,9 @@ ln -svf /var/log/nginx/error.log "$SUPPORT/www-error.log"
 find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
-# set up MySQL
+# set up MySQL and create tables
 . "$SUPPORT/setup_mysql.sh"
+. "$SUPPORT/refresh_opdata.sh"
 
 
 # set up ssd boot process (systemd service since Ubuntu 15.04)

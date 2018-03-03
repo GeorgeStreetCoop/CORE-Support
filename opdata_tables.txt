@@ -1,0 +1,17 @@
+couponcodes
+custdata
+customReceipt
+customReceiptMessage
+departments
+employees
+houseCouponItems
+houseCoupons
+houseVirtualCoupons
+MasterSuperDepts
+memberCards
+memtype
+parameters
+products
+productUser
+subdepts
+tenders
