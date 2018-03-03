@@ -5,3 +5,5 @@ php-queries.log
 www-access.log
 www-error.log
 /ssddir
+QuickMenus/[0-9].php
+QuickMenus/[0-9][0-9].php
