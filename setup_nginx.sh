@@ -18,7 +18,7 @@ apt-get install nginx
 
 
 # enable PHP 7.0 FPM (FastCGI Process Manager)
-cmp -s "$SUPPORT/template.sites-available_default" /etc/nginx/sites-available/default || /etc/nginx/sites-available/default /etc/nginx/sites-available/default~
+cmp -s "$SUPPORT/template.sites-available_default" /etc/nginx/sites-available/default || cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default~
 cp "$SUPPORT/template.sites-available_default" /etc/nginx/sites-available/default
 
 
