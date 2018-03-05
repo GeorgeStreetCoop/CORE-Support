@@ -151,10 +151,10 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 . "$SUPPORT/setup_code_tweaks.sh"
 
 
-# set background image to Co-op logo
+# set background image to Co-op peapod
 if [ "$LANENUMBER" -gt 0 ]; then
-	ln -svf "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
-	chown www-data "$SUPPORT/GeorgeStreetCoopLogo_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+	ln -svf "$SUPPORT/GeorgeStreetCoopPeapod_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
+	chown www-data "$SUPPORT/GeorgeStreetCoopPeapod_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
 fi
 
 
