@@ -3,5 +3,5 @@
 
 numlockx
 killall ssd
-nohup /sbin/start CORE-POS >/dev/null 2>&1 &
-
+# nohup /sbin/start CORE-POS >/dev/null 2>&1 &
+/usr/sbin/service CORE-POS start
