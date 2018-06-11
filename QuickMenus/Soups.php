@@ -1,18 +1,14 @@
 <?php
 
 $my_menu = array(
-		'Aromatic Chickpea Soup, 12oz' => '213',
-		'Aromatic Chickpea Soup, 16oz' => '214',
-		'Black Bean Soup, 12oz' => '223',
-		'Black Bean Soup, 16oz' => '224',
 		'Carrot Ginger Soup, 12oz' => '113',
 		'Carrot Ginger Soup, 16oz' => '114',
-		'Chickpea Lentil Soup, 12oz' => '233',
-		'Chickpea Lentil Soup, 16oz' => '234',
-		'Eggplant & Zucchini Soup, 12oz' => '243',
-		'Eggplant & Zucchini Soup, 16oz' => '244',
 		'Lentil Soup, 12oz' => '123',
 		'Lentil Soup, 16oz' => '124',
+		'Lentil Chickpea Soup, 12oz' => '233',
+		'Lentil Chickpea Soup, 16oz' => '234',
+		'Quinoa Sweet Potato Chili w/ Black Beans, 12oz' => '273',
+		'Quinoa Sweet Potato Chili w/ Black Beans, 16oz' => '274',
 		'Roasted Vegetable Soup, 12oz' => '133',
 		'Roasted Vegetable Soup, 16oz' => '134',
 		'Split Pea & Kale Soup, 12oz' => '253',
@@ -21,6 +17,8 @@ $my_menu = array(
 		'Three Bean Chili, 16oz' => '264',
 		'Tomato Soup w/ Garden Vegetables, 12oz' => '143',
 		'Tomato Soup w/ Garden Vegetables, 16oz' => '144',
+		'White Bean & Escarole Soup, 12oz' => '153',
+		'White Bean & Escarole Soup, 16oz' => '154',
 
 		'(other budget soup), 12oz' => '103',
 		'(other budget soup), 16oz' => '104',
