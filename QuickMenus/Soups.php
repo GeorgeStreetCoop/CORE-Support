@@ -3,10 +3,10 @@
 $my_menu = array(
 		'Carrot Ginger Soup, 12oz' => '113',
 		'Carrot Ginger Soup, 16oz' => '114',
+		'Chickpea Lentil Soup, 12oz' => '233',
+		'Chickpea Lentil Soup, 16oz' => '234',
 		'Lentil Soup, 12oz' => '123',
 		'Lentil Soup, 16oz' => '124',
-		'Lentil Chickpea Soup, 12oz' => '233',
-		'Lentil Chickpea Soup, 16oz' => '234',
 		'Quinoa Sweet Potato Chili w/ Black Beans, 12oz' => '273',
 		'Quinoa Sweet Potato Chili w/ Black Beans, 16oz' => '274',
 		'Roasted Vegetable Soup, 12oz' => '133',
