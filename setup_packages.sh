@@ -11,7 +11,7 @@ done
 
 # add packages
 sudo apt-get -qq update
-sudo apt-get -y install `cat packages.txt`
+sudo apt-get -y --ignore-missing install `cat packages.txt`
 
 # add packages
 sudo apt-get -y remove `cat packages_remove.txt`
