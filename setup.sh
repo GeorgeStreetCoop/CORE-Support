@@ -131,7 +131,7 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
 # set up xwindows, including boot process
-. "$SUPPORT/setup_xwindows.sh"
+#. "$SUPPORT/setup_xwindows.sh"
 
 # start xwindows (depends on setup_xwindows.sh settings)
 #nohup startx > /dev/null
