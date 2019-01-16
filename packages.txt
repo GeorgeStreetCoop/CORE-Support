@@ -6,9 +6,6 @@ mysql-server
 php-fpm
 php-mysql
 phpmyadmin
-xorg
-slim
-openbox
 surf
 ttf-mscorefonts-installer
 numlockx
