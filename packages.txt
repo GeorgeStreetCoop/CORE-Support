@@ -9,3 +9,4 @@ phpmyadmin
 surf
 ttf-mscorefonts-installer
 numlockx
+ufw
