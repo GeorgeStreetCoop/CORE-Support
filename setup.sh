@@ -158,6 +158,10 @@ if [ "$LANENUMBER" -gt 0 ]; then
 fi
 
 
+# set up firewall
+. "$SUPPORT/setup_ufw.sh"
+
+
 # cleanup environment
 unset LANEPASSWORD
 if [ -n "$WD_BEFORE_COREPOS_SETUP" ]; then
