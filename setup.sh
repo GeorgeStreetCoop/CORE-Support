@@ -131,7 +131,7 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 
 
 # set up xwindows, including boot process
-. "$SUPPORT/setup_xwindows.sh"
+#. "$SUPPORT/setup_xwindows.sh"
 
 # start xwindows (depends on setup_xwindows.sh settings)
 #nohup startx > /dev/null
@@ -156,6 +156,10 @@ if [ "$LANENUMBER" -gt 0 ]; then
 	ln -svf "$SUPPORT/GeorgeStreetCoopPeapod_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
 	chown www-data "$SUPPORT/GeorgeStreetCoopPeapod_670x510.gif" "$COREPOS/pos/is4c-nf/graphics/is4c.gif"
 fi
+
+
+# set up firewall
+. "$SUPPORT/setup_ufw.sh"
 
 
 # cleanup environment

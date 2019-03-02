@@ -10,10 +10,6 @@ if [ -z "$COREPOS" ]; then
 fi
 
 
-# set up lane URL
-ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/html/lane"
-
-
 apt-get install nginx
 
 
@@ -35,3 +31,10 @@ nginx -t
 # restart nginx and PHP 7.0 FPM
 service nginx restart
 service php7.0-fpm restart
+
+
+# set up lane URLs
+ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/lane" # Apache2, Ubuntu before 13.10
+ln -svf "$COREPOS/pos/is4c-nf/" "/var/www/html/lane" # Apache2, Ubuntu 13.10 and later
+ln -svf "$COREPOS/pos/is4c-nf/" "/usr/share/nginx/www/lane" # nginx, earlier
+ln -svf "$COREPOS/pos/is4c-nf/" "/usr/share/nginx/html/lane" # nginx, later

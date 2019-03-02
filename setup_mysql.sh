@@ -20,10 +20,10 @@ if [ "$LANENUMBER" -gt 0 ]; then
 	echo 'When prompted below, please enter your mysql ROOT password...'
 	mysql -u root -p --force < "$SUPPORT/setup_db.sql"
 
-	# set 'bind-address = $HOST_IP' in /etc/mysql/mysql.conf.d/mysqld.cnf
+	# set 'bind-address = 0.0.0.0' in /etc/mysql/mysql.conf.d/mysqld.cnf
 	HOST_IP=`hostname -I`
 	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf~
-	sed -i "s/^\s*#*\s*bind-address\(\s*=\s*\)127\.0\.0\.1\s*\$/bind-address\t= ${HOST_IP} # CORE-Support setup_mysql.sh\nsql-mode\t= NO_ENGINE_SUBSTITUTION # CORE-Support setup_mysql.sh/" /etc/mysql/mysql.conf.d/mysqld.cnf
+	sed -i "s/^\s*#*\s*bind-address\(\s*=\s*\)127\.0\.0\.1\s*\$/bind-address\t= 0.0.0.0 # CORE-Support setup_mysql.sh\nsql-mode\t= NO_ENGINE_SUBSTITUTION # CORE-Support setup_mysql.sh/" /etc/mysql/mysql.conf.d/mysqld.cnf
 fi
 
 
