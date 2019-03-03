@@ -36,8 +36,12 @@ $q->bindColumn('Timeframe', $timeframe);
 $q->bindColumn('Sales', $sales);
 
 
-if (!$is_http) echo '==='.$lf;
+if (!$is_http) echo $lf;
+$total = 0;
 while ($q->fetch(PDO::FETCH_BOUND)) {
+	$total += $sales;
 	echo $timeframe.': $'.$sales.$lf;
 }
-if (!$is_http) echo '==='.$lf;
+echo '━━━━━━━'.$lf;
+echo ($is_http? '<b>Total</b>' : '  Total').': $'.number_format($total, 2).$lf;
+if (!$is_http) echo $lf;
