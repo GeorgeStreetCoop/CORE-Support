@@ -222,7 +222,7 @@
 					--	ChargeOk = 0,
 						WriteChecks = IF(:discount, 1, 0),
 					--	StoreCoupons = 1,
-						Type = "PC", 
+						Type = "PC",
 						memType = CONCAT(IF(:is_senior, "1", ""), IF(:is_staff, "9", FIELD(:discount, "5", "8", "15", "25"))),
 						staff = :is_staff,
 						SSI = :is_senior,
@@ -587,8 +587,12 @@
 
 					if ($date_records++ % 5 === 0)
 						echo '.';
+
 					$date_gross += $gross_price;
+					$total_gross += $gross_price;
 					$date_net += $gross_price - $member_discount - $senior_discount;
+					$total_net += $gross_price - $member_discount - $senior_discount;
+
 					switch ($department) {
 						case 101:
 						case 102:
@@ -600,7 +604,9 @@
 						case 113:
 						case 114:
 							$date_reported_gross += $gross_price;
+							$total_reported_gross += $gross_price;
 							$date_reported_net += $gross_price - $member_discount - $senior_discount;
+							$total_reported_net += $gross_price - $member_discount - $senior_discount;
 					}
 
 					$blocks[] = "\n\t({$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
@@ -627,6 +633,12 @@
 				$total_records = number_format($total_records);
 				$upcs_changed = number_format($upcs_changed);
 				echo "{$lf}Exported {$total_records} total records (adding {$upcs_changed} checksums) in {$total_duration} seconds, {$overall_rate} records/second average.{$lf}";
+
+				$total_gross = '$'.number_format($total_gross, 2);
+				$total_net = '$'.number_format($total_net, 2);
+				$total_reported_gross = '$'.number_format($total_reported_gross, 2);
+				$total_reported_net = '$'.number_format($total_reported_net, 2);
+				echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
 			}
 
 		}
