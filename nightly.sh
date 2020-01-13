@@ -48,3 +48,7 @@ php ../CORE-POS/fannie/classlib2.0/FannieTask.php ReportDataCacheTask
 
 # clear out unneeded lane data (mostly translog.localtrans)
 php ../CORE-POS/fannie/classlib2.0/FannieTask.php LaneTrimTask
+
+
+# copy sales data from POS to webserver
+. ./update_sales.sh

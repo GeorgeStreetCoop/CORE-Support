@@ -147,10 +147,14 @@
 		);
 	if (count($_POST))
 		$invoke_params = $_POST;
-	elseif (in_array($_SERVER['PHP_SELF'], $_SERVER['argv'])) {
-		$allowed_params['sync_lanes'] = null;
-		$invoke_params = array_flip($_SERVER['argv']);
-		unset($invoke_params[$_SERVER['PHP_SELF']]);
+	elseif ($_SERVER['argv']) {
+		$invoke_params = $arg_parsed = [];
+		foreach ($argv as $idx => $arg) {
+			if ($idx == 0 && $arg == $_SERVER['PHP_SELF']) continue;
+
+			parse_str($arg, $arg_parsed);
+			$invoke_params += $arg_parsed;
+		}
 	}
 
 	if (isset($invoke_params)) {
