@@ -14,6 +14,8 @@
 #   dlogbig: bigarchive where trans_status not in (D, X, Z) and emp_no != 9999 and register_no != 99
 
 
+echo "Running CORE-POS tasks..."
+echo
 
 # products -> productBackup; custdata -> custdataBackup
 php ../CORE-POS/fannie/classlib2.0/FannieTask.php TableSnapshotTask
@@ -49,6 +51,12 @@ php ../CORE-POS/fannie/classlib2.0/FannieTask.php ReportDataCacheTask
 # clear out unneeded lane data (mostly translog.localtrans)
 php ../CORE-POS/fannie/classlib2.0/FannieTask.php LaneTrimTask
 
+echo
+echo
+
+
+echo "Copying sales data from POS to webserver..."
+echo
 
 # copy sales data from POS to webserver
-. ./update_sales.sh
+. /CORE-Support/update_sales.sh
