@@ -499,8 +499,10 @@
 
 		if ($xfer_sales) {
 			$sales_start_time = microtime(1);
-			$sales_fetch_q = $office_db->prepare('
-					SELECT
+
+			$sales_fetch_sqls = [
+
+					'SELECT
 						DATE_FORMAT(datetime, "%Y-%m-%d") SaleDate,
 						DATE_FORMAT(datetime, "%Y-%m-%d %a") SaleDateNice,
 						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
@@ -528,123 +530,173 @@
 							AND (:end_date + INTERVAL 1 DAY) -- expand endpoint to end-of-day
 					GROUP BY
 						DATE_FORMAT(datetime, "%Y-%m-%d"),
-						upc
-				');
-			$params = array(
-					':start_date' => $start_date,
-					':end_date' => $end_date,
-				);
-			$r = $sales_fetch_q->execute($params);
-			$sales_fetch_q->bindColumn('SaleDate', $sale_date);
-			$sales_fetch_q->bindColumn('SaleDateNice', $sale_date_nice);
-			$sales_fetch_q->bindColumn('UPC', $upc);
-			$sales_fetch_q->bindColumn('Department', $department);
-			$sales_fetch_q->bindColumn('ItemCount', $item_count);
-			$sales_fetch_q->bindColumn('GrossPrice', $gross_price);
-			$sales_fetch_q->bindColumn('MemberDiscount', $member_discount);
-			$sales_fetch_q->bindColumn('SeniorDiscount', $senior_discount);
+						upc',
 
-			if (!$r) {
-				echo "{$lf}— error querying CORE-POS: " . $sales_fetch_q->errorInfo()[2] . $lf;
-			}
-			else {
-				$sales_clear_q = $coop_products_db->prepare('
-						DELETE FROM ProductSales
-						WHERE SaleDate BETWEEN :start_date AND :end_date
-					');
-				$r = $sales_clear_q->execute($params);
+					'SELECT
+						DATE_FORMAT(datetime, "%Y-%m-%d") SaleDate,
+						DATE_FORMAT(datetime, "%Y-%m-%d %a") SaleDateNice,
+						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
+								CONCAT("9999999999", department),             upc         ) UPC,
+						department Department,
+						SUM(quantity) ItemCount,
+						SUM(total) GrossPrice,
+						SUM(total * IF(discountable = 1, (percentDiscount - IF(memtype >= 10, 5, 0)) * 0.01, 0)) MemberDiscount,
+						SUM(total * IF(memtype >= 10 AND discountable = 1, 0.05, 0)) SeniorDiscount
+					FROM office_trans.dtransactions
+					WHERE register_no != 99
+						AND emp_no != 9999
+						AND trans_status NOT IN ("D", "X", "Z")
+						AND (( -- regular items
+							upc REGEXP "^[0-9]+$"
+							AND upc > 0
+							AND department > 0
+						) OR ( -- open rings; UPC will be made up of 9999999999 prepended to dept ID
+							upc REGEXP "^-?[0-9.]+DP+[0-9]+$"
+						))
+						AND datetime
+							BETWEEN :start_date
+							AND (:end_date + INTERVAL 1 DAY) -- expand endpoint to end-of-day
+					GROUP BY
+						DATE_FORMAT(datetime, "%Y-%m-%d"),
+						upc',
+
+				];
+
+			$header_sql = "REPLACE ProductSales\n";
+			$header_sql .= "\t(UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
+			$header_sql .= "VALUES";
+
+			foreach ($sales_fetch_sqls as $sales_fetch_sql) {
+				$sales_fetch_q = $office_db->prepare($sales_fetch_sql);
+				$params = array(
+						':start_date' => $start_date,
+						':end_date' => $end_date,
+					);
+				$r = $sales_fetch_q->execute($params);
+
 				if (!$r) {
-					echo "{$lf}— error clearing date range in sales table: " . $sales_clear_q->errorInfo()[2] . $lf;
+					echo "{$lf}— error querying CORE-POS: " . $sales_fetch_q->errorInfo()[2] . $lf;
 				}
+				else {
+					// do bindings
+					$sales_fetch_q->bindColumn('SaleDate', $sale_date);
+					$sales_fetch_q->bindColumn('SaleDateNice', $sale_date_nice);
+					$sales_fetch_q->bindColumn('UPC', $upc);
+					$sales_fetch_q->bindColumn('Department', $department);
+					$sales_fetch_q->bindColumn('ItemCount', $item_count);
+					$sales_fetch_q->bindColumn('GrossPrice', $gross_price);
+					$sales_fetch_q->bindColumn('MemberDiscount', $member_discount);
+					$sales_fetch_q->bindColumn('SeniorDiscount', $senior_discount);
 
-				while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND)) {
-					if ($header_sale_date != $sale_date) {
-						if ($header_sale_date) {
-							$block .= join(',', $blocks);
-							$r = $coop_products_db->exec($block);
-							if (!$r) {
-								echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
-							}
-							else {
-								$date_gross = '$'.number_format($date_gross, 2);
-								$date_net = '$'.number_format($date_net, 2);
-								$date_reported_gross = '$'.number_format($date_reported_gross, 2);
-								$date_reported_net = '$'.number_format($date_reported_net, 2);
-								echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
-								$total_records += $date_records;
-							}
+					// clear destination range (but only once per data transfer!)
+					if (!$sales_clear_q) {
+						// echo "<pre style='background-color:#fdd;font:8px Courier'>DELETE FROM ProductSales WHERE SaleDate BETWEEN '$start_date' AND '$end_date'</pre>";
+						$sales_clear_q = $coop_products_db->prepare('
+								DELETE FROM ProductSales
+								WHERE SaleDate BETWEEN :start_date AND :end_date
+							');
+						$r = $sales_clear_q->execute($params);
+						if (!$r) {
+							echo "{$lf}— error clearing date range in sales table: " . $sales_clear_q->errorInfo()[2] . $lf;
 						}
-						$header_sale_date = $sale_date;
-						$block = "REPLACE ProductSales\n";
-						$block .= "\t(UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
-						$block .= "VALUES";
-						$blocks = array();
-
-						echo $sale_date_nice;
-						flush();
-						usleep(1000);
-						set_time_limit(60);
-						$date_records = $date_gross = $date_net = $date_reported_gross = $date_reported_net = 0;
-					}
-					$upc_corrected = $upc . getCheckDigit($upc);
-					$upcs_changed += ($upc_corrected === $upc? 0 : 1);
-
-					if ($date_records++ % 5 === 0)
-						echo '.';
-
-					$date_gross += $gross_price;
-					$total_gross += $gross_price;
-					$date_net += $gross_price - $member_discount - $senior_discount;
-					$total_net += $gross_price - $member_discount - $senior_discount;
-
-					switch ($department) {
-						case 101:
-						case 102:
-						case 103:
-						case 105:
-						case 106:
-						case 108:
-						case 112:
-						case 113:
-						case 114:
-							$date_reported_gross += $gross_price;
-							$total_reported_gross += $gross_price;
-							$date_reported_net += $gross_price - $member_discount - $senior_discount;
-							$total_reported_net += $gross_price - $member_discount - $senior_discount;
 					}
 
-					$blocks[] = "\n\t({$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
+					while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND)) {
+
+						// are we on a new date? if so, send old day's data (if it exists)
+						// echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars("$header_sale_date != $sale_date? (".count($values_sqls).")")."</pre>";
+						// echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars("$sale_date_nice: $upc")."</pre>";
+						if ($header_sale_date != $sale_date) {
+							if ($header_sale_date) {
+								$insert_sql = $header_sql . join(",", $values_sqls);
+								// echo "<pre style='background-color:#ddf;font:8px Courier'>".htmlspecialchars($insert_sql)."</pre>";
+								$r = $coop_products_db->exec($insert_sql);
+								if (!$r) {
+									echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
+								}
+								else {
+									$date_gross = '$'.number_format($date_gross, 2);
+									$date_net = '$'.number_format($date_net, 2);
+									$date_reported_gross = '$'.number_format($date_reported_gross, 2);
+									$date_reported_net = '$'.number_format($date_reported_net, 2);
+									echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
+									$total_records += $date_records;
+								}
+							}
+							$header_sale_date = $sale_date;
+							$values_sqls = array();
+
+							echo $sale_date_nice;
+							flush();
+							usleep(10);
+							set_time_limit(60);
+							$date_records = $date_gross = $date_net = $date_reported_gross = $date_reported_net = 0;
+						}
+
+						// set up new row
+						$upc_corrected = $upc . getCheckDigit($upc);
+						$upcs_changed += ($upc_corrected === $upc? 0 : 1);
+
+						if ($date_records++ % 5 === 0)
+							echo '.';
+
+						$date_gross += $gross_price;
+						$total_gross += $gross_price;
+						$date_net += $gross_price - $member_discount - $senior_discount;
+						$total_net += $gross_price - $member_discount - $senior_discount;
+
+						switch ($department) {
+							case 101:
+							case 102:
+							case 103:
+							case 105:
+							case 106:
+							case 108:
+							case 112:
+							case 113:
+							case 114:
+								$date_reported_gross += $gross_price;
+								$total_reported_gross += $gross_price;
+								$date_reported_net += $gross_price - $member_discount - $senior_discount;
+								$total_reported_net += $gross_price - $member_discount - $senior_discount;
+						}
+
+						$values_sql = "\n\t({$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
+						// echo "<pre style='background-color:#ffd;font:8px Courier'>".htmlspecialchars($values_sql)."</pre>";
+						$values_sqls[] = $values_sql;
+					}
 				}
-				if ($header_sale_date) {
-					$block .= join(',', $blocks);
-					$r = $coop_products_db->exec($block);
-					if (!$r) {
-						echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
-					}
-					else {
-						$date_gross = '$'.number_format($date_gross, 2);
-						$date_net = '$'.number_format($date_net, 2);
-						$date_reported_gross = '$'.number_format($date_reported_gross, 2);
-						$date_reported_net = '$'.number_format($date_reported_net, 2);
-						echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
-						$total_records += $date_records;
-					}
+
+			}
+			if ($header_sale_date && count($values_sqls)) {
+				$insert_sql = $header_sql . join(",", $values_sqls);
+				// echo "<pre style='background-color:#dff;font:8px Courier'>".htmlspecialchars($insert_sql)."</pre>";
+				$r = $coop_products_db->exec($insert_sql);
+				if (!$r) {
+					echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
 				}
-
-				$sales_end_time = microtime(1);
-				$total_duration = number_format($sales_end_time - $sales_start_time, 3);
-				$overall_rate = number_format($total_records / ($sales_end_time - $sales_start_time), 3);
-				$total_records = number_format($total_records);
-				$upcs_changed = number_format($upcs_changed);
-				echo "{$lf}Exported {$total_records} total records (adding {$upcs_changed} checksums) in {$total_duration} seconds, {$overall_rate} records/second average.{$lf}";
-
-				$total_gross = '$'.number_format($total_gross, 2);
-				$total_net = '$'.number_format($total_net, 2);
-				$total_reported_gross = '$'.number_format($total_reported_gross, 2);
-				$total_reported_net = '$'.number_format($total_reported_net, 2);
-				echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
+				else {
+					$date_gross = '$'.number_format($date_gross, 2);
+					$date_net = '$'.number_format($date_net, 2);
+					$date_reported_gross = '$'.number_format($date_reported_gross, 2);
+					$date_reported_net = '$'.number_format($date_reported_net, 2);
+					echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
+					$total_records += $date_records;
+				}
 			}
 
+			$sales_end_time = microtime(1);
+			$total_duration = number_format($sales_end_time - $sales_start_time, 3);
+			$overall_rate = number_format($total_records / ($sales_end_time - $sales_start_time), 3);
+			$total_records = number_format($total_records);
+			$upcs_changed = number_format($upcs_changed);
+			echo "{$lf}Exported {$total_records} total records (adding {$upcs_changed} checksums) in {$total_duration} seconds, {$overall_rate} records/second average.{$lf}";
+
+			$total_gross = '$'.number_format($total_gross, 2);
+			$total_net = '$'.number_format($total_net, 2);
+			$total_reported_gross = '$'.number_format($total_reported_gross, 2);
+			$total_reported_net = '$'.number_format($total_reported_net, 2);
+			echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
 		}
 	}
 
