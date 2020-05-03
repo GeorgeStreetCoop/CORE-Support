@@ -593,7 +593,9 @@
 						// echo "<pre style='background-color:#fdd;font:8px Courier'>DELETE FROM ProductSales WHERE SaleDate BETWEEN '$start_date' AND '$end_date'</pre>";
 						$sales_clear_q = $coop_products_db->prepare('
 								DELETE FROM ProductSales
-								WHERE SaleDate BETWEEN :start_date AND :end_date
+								WHERE
+									Source = "CORE-POS"
+									AND SaleDate BETWEEN :start_date AND :end_date
 							');
 						$r = $sales_clear_q->execute($params);
 						if (!$r) {
