@@ -563,7 +563,7 @@
 				];
 
 			$header_sql = "REPLACE ProductSales\n";
-			$header_sql .= "\t(UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
+			$header_sql .= "\t(Source, UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
 			$header_sql .= "VALUES";
 
 			foreach ($sales_fetch_sqls as $sales_fetch_sql) {
@@ -663,7 +663,7 @@
 								$total_reported_net += $gross_price - $member_discount - $senior_discount;
 						}
 
-						$values_sql = "\n\t({$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
+						$values_sql = "\n\t('CORE-POS', {$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
 						// echo "<pre style='background-color:#ffd;font:8px Courier'>".htmlspecialchars($values_sql)."</pre>";
 						$values_sqls[] = $values_sql;
 					}
