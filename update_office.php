@@ -1,4 +1,6 @@
 <?php
+	$use_prepared = false;
+
 	$is_cron = (php_sapi_name() == 'cli');
 	$lf = ($is_cron? "\n" : "<br>\n");
 	$hr = ($is_cron? '' : "<br>\n");
@@ -392,6 +394,7 @@
 			$coop_products_q = $coop_products_db->query('SELECT * FROM ProductsForIS4C');
 
 			$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
+if ($use_prepared) {
 			$office_products_q = $office_db->prepare('
 					INSERT products
 					SET
@@ -429,11 +432,11 @@
 						default_vendor_id = :default_vendor_id,
 						id = :id
 				');
-
+}
 			flush();
 			while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
 				set_time_limit(60);
-
+if ($use_prepared) {
 				$coop_products_params = array();
 				foreach ($coop_product as $column => $value) {
 					$coop_products_params[':'.$column] = $value;
@@ -455,12 +458,27 @@
 				}
 				elseif ((++$e >= 5) && ($e > $i * 5))
 					die;
+}
+else {
+				$coop_products_copy = $coop_product;
+				$coop_products_copy['brand'] = textASCII($coop_product['brand']);
+				$coop_products_copy['description'] = textASCII($coop_product['description']);
+				$coop_products_copy['discount'] = 1;
+
+				$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
+						'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
+						$coop_products_copy
+					);
+				if ($r !== false)
+					echo '.';
+}
 			}
 
+if ($use_prepared) {
 			// Add non-product POS lookups
-			$office_nonproducts = array(
-					array(':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111),
-				);
+			$office_nonproducts = [
+					[':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111],
+				];
 			foreach ($office_nonproducts as $office_nonproduct) {
 				if (!($r = $office_products_q->execute($office_nonproduct)))
 					reportInsertError($office_products_q, $office_nonproduct);
@@ -472,6 +490,36 @@
 					}
 				}
 			}
+}
+else {
+			$office_nonproduct = [
+					'upc' => '0000000091111',
+					'description' => $asof_date,
+					'brand' => '',
+					'normal_price' => 0,
+					'department' => 0,
+					'tax' => 0,
+					'foodstamp' => 0,
+					'scale' => 0,
+					'wicable' => 0,
+					'qttyEnforced' => 0,
+					'cost' => 0,
+					'inUse' => 1,
+					'deposit' => NULL,
+					'default_vendor_id' => NULL,
+					'id' => 91111,
+					'discount' => 0,
+				];
+			$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
+					'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
+					$office_nonproduct,
+					true
+				);
+			if ($r !== false)
+				echo ';';
+			echo "<br>\n";
+			flush();
+}
 
 			$product_sync_urls = array(
 					'products' => 'Synchronize Products to Lanes',
@@ -856,4 +904,79 @@ function textASCII($text_utf8)
 	}
 // 	echo "<span style=\"color:green\">“".($text_ascii)."”</span><br>\n";
 	return $text_ascii;
+}
+
+
+function pdoBulkInsertOp($operation, $db, $tablename, $fieldnames, $values, $trigger=100)
+{
+	switch (strtoupper($operation)) {
+		case 'INSERT':
+		case 'INSERT IGNORE':
+		case 'REPLACE':
+			break;
+		default:
+			$operation = 'INSERT';
+	}
+
+	static $inserts = [];
+
+	if ($values) {
+		$insert = [];
+		foreach ($values as $value) {
+			switch (gettype($value)) {
+				case 'NULL':
+				case 'boolean':
+				case 'integer':
+					$insert[] = var_export($value, true);
+					break;
+
+				case 'double':
+					$insert[] = var_export($value, true);
+// 					$insert[] = round($value, 6);
+					break;
+
+				case 'string':
+					$insert[] = $db->quote($value);
+					break;
+
+				case 'array':
+				case 'object':
+				case 'resource':
+				case 'unknown type':
+				default:
+					$insert[] = 'NULL';
+			}
+		}
+		$inserts[] = '						('.join(', ', $insert).')';
+	}
+
+	if (
+			!$values // can trigger query by providing empty $values array
+			||
+			(
+				is_numeric($trigger) || ctype_digit($trigger)?
+				(count($inserts) >= $trigger) // can trigger query by providing numeric $trigger
+				: $trigger // can trigger query by providing $trigger = true
+			)
+		) {
+
+		if (count($inserts)) {
+			$insert_q = '
+					'.$operation.' `'.$tablename.'`
+						('.(is_array($fieldnames)? '`'.join('`, `', $fieldnames).'`' : $fieldnames).')
+					VALUES'."\n"
+					. join(",\n", $inserts)
+				;
+// 			echo '<pre>'.$insert_q.'</pre>';
+			$insert_count = $db->exec($insert_q);
+
+			$inserts = [];
+		}
+		else {
+			$insert_count = 0;
+		}
+		return $insert_count;
+	}
+
+	return false;
 }
