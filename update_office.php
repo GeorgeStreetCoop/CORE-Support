@@ -872,6 +872,7 @@ function textASCII($text_utf8)
 			'u' => 'úûüùů',
 			'y' => 'ý',
 			'z' => 'ž',
+			'2' => '₂', // used for CO₂
 			"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
 			'"' => '“”″',
 		);
