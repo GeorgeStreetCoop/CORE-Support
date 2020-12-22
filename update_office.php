@@ -312,6 +312,10 @@
 				$member_details[':last_name'] = textASCII($member_details[':last_name']);
 				$member_details[':first_name'] = textASCII($member_details[':first_name']);
 
+				// Prepend SEN and EXP prefixes for Senior and Expired status
+				if ($coop_member['is_senior']) $member_details[':first_name'] = 'SEN '.$member_details[':first_name'];
+				if ($coop_member['is_expired']) $member_details[':first_name'] = 'EXP '.$member_details[':first_name'];
+
 				$office_custdata_params = array_intersect_key($member_details, $office_custdata_paramlist);
 				$office_meminfo_params = array_intersect_key($member_details, $office_meminfo_paramlist);
 				$office_memdates_params = array_intersect_key($member_details, $office_memdates_paramlist);
