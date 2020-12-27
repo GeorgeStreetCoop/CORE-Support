@@ -560,7 +560,7 @@ else {
 						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
 								CONCAT("9999999999", department), -- open rings
 								upc -- regular items
-							) UPC,
+						) UPC,
 						department Department,
 						SUM(quantity) ItemCount,
 						SUM(total) GrossPrice,
@@ -582,13 +582,18 @@ else {
 							AND (:end_date + INTERVAL 1 DAY) -- expand endpoint to end-of-day
 					GROUP BY
 						DATE_FORMAT(datetime, "%Y-%m-%d"),
-						upc',
+						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
+								CONCAT("9999999999", department), -- open rings
+								upc -- regular items
+						)',
 
 					'SELECT
 						DATE_FORMAT(datetime, "%Y-%m-%d") SaleDate,
 						DATE_FORMAT(datetime, "%Y-%m-%d %a") SaleDateNice,
 						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
-								CONCAT("9999999999", department),             upc         ) UPC,
+								CONCAT("9999999999", department),
+								upc
+						) UPC,
 						department Department,
 						SUM(quantity) ItemCount,
 						SUM(total) GrossPrice,
@@ -610,7 +615,10 @@ else {
 							AND (:end_date + INTERVAL 1 DAY) -- expand endpoint to end-of-day
 					GROUP BY
 						DATE_FORMAT(datetime, "%Y-%m-%d"),
-						upc',
+						IF(upc REGEXP "^-?[0-9.]+DP+[0-9]+$",
+								CONCAT("9999999999", department),
+								upc
+						)',
 
 				];
 
