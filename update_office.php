@@ -169,7 +169,7 @@
 			echo "Connecting with `{$OFFICE_OP_DBNAME}`...{$lf}";
 			$office_dsn = "mysql:dbname={$OFFICE_OP_DBNAME};host={$OFFICE_SERVER};charset=utf8";
 			try {
-				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
+				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 10));
 				$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
 				echo 'Office connection failed: ' . $e->getMessage() . $lf;
@@ -181,10 +181,10 @@
 			echo "Connecting with `{$coop_member_dbname}`...{$lf}";
 			$coop_members_dsn = "mysql:dbname={$coop_member_dbname};host={$coop_host};charset=utf8";
 			try {
-				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw);
+				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
 				$coop_members_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$coop_members_dsn}) failed: " . $e->getMessage() . $lf;
+				echo "Co-op member DB connection ({$coop_members_dsn}) failed: " . $e->getMessage() . $lf;
 			}
 
 			$coop_members_q = $coop_members_db->query('SELECT * FROM MembersForIS4C');
@@ -387,10 +387,10 @@
 			echo "Connecting with `{$coop_products_dbname}`...{$lf}";
 			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
 			try {
-				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw);
+				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
 				$coop_products_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
+				echo "Co-op product DB connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
 		}
 
@@ -772,7 +772,7 @@ else {
 		if ($lane_up && strlen($OFFICE_SERVER_PW)) {
 			$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
 			try {
-				$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW);
+				$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 1));
 				$lane_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 				$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
 				if ($lane_login['LoggedIn']) {
@@ -794,8 +794,8 @@ else {
 				}
 				$lane_db = null;
 			} catch (PDOException $e) {
-				echo "Co-op connection ({$lane_db}) failed: " . $e->getMessage() . $lf;
-				$lane_status = '(ERROR)';
+				$lane_status = 'ERROR: '.$e->getMessage();
+				$lane_up = false;
 			}
 		}
 		if ($is_cron)
