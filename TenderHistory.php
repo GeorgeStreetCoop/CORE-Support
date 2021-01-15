@@ -51,11 +51,17 @@ h3	{
 				</td>
 			</tr>
 			<tr>
-				<td>Database / Table</td>
+				<td>Transactions Database / Table</td>
 				<td>
-					<input type="text" name="database" value="<?=$database?:'office_trans'?>">
+					<input type="text" name="trans_database" value="<?=$trans_database?:'office_trans'?>">
 					&nbsp;
 					<input type="text" name="trans_table" value="<?=$trans_table?:'transarchive'?>">
+				</td>
+			</tr>
+			<tr>
+				<td>Operational Data / Table</td>
+				<td>
+					<input type="text" name="op_database" value="<?=$op_database?:'office_opdata'?>">
 				</td>
 			</tr>
 			<tr>
@@ -82,7 +88,7 @@ h3	{
 	ini_set('log_errors', 0);
 	ini_set('error_log', '/dev/null');
 
-	$office_dsn = "mysql:dbname={$database};host={$host};charset=utf8";
+	$office_dsn = "mysql:dbname={$trans_database};host={$host};charset=utf8";
 	try {
 		$office_db = new PDO($office_dsn, $username, $password);
 		$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
@@ -90,7 +96,6 @@ h3	{
 		echo 'Office connection failed: ' . $e->getMessage();
 	}
 
-	$opdata_dbname = 'core_opdata';
 	$report_params = array(
 		'department' => "
 					SELECT
@@ -101,7 +106,7 @@ h3	{
 						'item' GroupQuantityLabel,
 						SUM(d.total) GroupValue
 					FROM {$trans_table} d
-						LEFT JOIN {$opdata_dbname}.departments t ON d.department=t.dept_no
+						LEFT JOIN {$op_database}.departments t ON d.department=t.dept_no
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.department != 0
@@ -147,7 +152,7 @@ h3	{
 						'transaction' GroupQuantityLabel,
 						-SUM(d.total) GroupValue
 					FROM {$trans_table} d
-						LEFT JOIN {$opdata_dbname}.tenders t ON d.trans_subtype = t.TenderCode
+						LEFT JOIN {$op_database}.tenders t ON d.trans_subtype = t.TenderCode
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'T'
@@ -167,9 +172,12 @@ h3	{
 		$params[':trans_date'] = date('Y-m-d', $date);
 
 		foreach ($prepared_report_params as $report => $prepared) {
-			$prepared->execute($params);
-
 			echo("<h3>".ucwords($report)." Report</h3>");
+
+			if ($prepared->execute($params) === false) {
+				echo "<b style=\"color:red\">Database error: ".$prepared->errorInfo()[2]."</b><br>\n";
+				continue;
+			}
 
 			$total_quantity = $total_value = 0;
 
