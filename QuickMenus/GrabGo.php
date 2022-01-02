@@ -2,7 +2,7 @@
 
 $my_menu = array(
     'Spinach Pie' => '51',
-    'Spinach Pie, with Soup' => '52',
+    'Spinach Pie, discounted for Soup' => '52',
     'Small Coffee' => '13',
     'Large Coffee' => '14',
     'Coffee Refill' => '10',
