@@ -163,7 +163,9 @@
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
 		extract($invoke_params);
 		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
-		$asof_date = 'as of '.date('M j Y g:ia');
+		$asof = time();
+		$asof_date = 'as of '.date('M j Y g:ia', $time);
+		$asof_hash = date('Y-m-d_His', $time);
 
 		if ($xfer_members || $xfer_products || $xfer_sales) {
 			echo "Connecting with `{$OFFICE_OP_DBNAME}`...{$lf}";
@@ -530,7 +532,7 @@ else {
 					'products' => 'Synchronize Products to Lanes',
 				);
 			foreach ($product_sync_urls as $tablename => $label) {
-				$url = "{$office_server_sync_url_base}?tablename={$tablename}";
+				$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
 				if ($sync_lanes) {
 					$data = file_get_contents('http:' . $url);
 					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
