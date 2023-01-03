@@ -163,7 +163,7 @@
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
 		extract($invoke_params);
 		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
-		$asof = time();
+		$time = time();
 		$asof_date = 'as of '.date('M j Y g:ia', $time);
 		$asof_hash = date('Y-m-d_His', $time);
 
