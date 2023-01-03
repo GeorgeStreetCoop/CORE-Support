@@ -367,7 +367,7 @@
 					'memtype' => 'Synchronize Member Types to Lanes',
 				);
 			foreach ($member_sync_urls as $tablename => $label) {
-				$url = "{$office_server_sync_url_base}?tablename={$tablename}";
+				$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
 				if ($sync_lanes) {
 					$data = file_get_contents('http:' . $url);
 					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
