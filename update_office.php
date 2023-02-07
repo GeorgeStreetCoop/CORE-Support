@@ -168,7 +168,7 @@
 		$asof_hash = date('Y-m-d_His', $time);
 
 		if ($xfer_members || $xfer_products || $xfer_sales) {
-			echo "Connecting with `{$OFFICE_OP_DBNAME}`...{$lf}";
+			echo "Connecting with {$OFFICE_SERVER} `{$OFFICE_OP_DBNAME}`...{$lf}";
 			$office_dsn = "mysql:dbname={$OFFICE_OP_DBNAME};host={$OFFICE_SERVER};charset=utf8";
 			try {
 				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 10));
@@ -180,7 +180,7 @@
 		}
 
 		if ($xfer_members) {
-			echo "Connecting with `{$coop_member_dbname}`...{$lf}";
+			echo "Connecting with {$coop_host} `{$coop_member_dbname}`...{$lf}";
 			$coop_members_dsn = "mysql:dbname={$coop_member_dbname};host={$coop_host};charset=utf8";
 			try {
 				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
@@ -387,7 +387,7 @@
 		}
 
 		if ($xfer_products || $xfer_sales) {
-			echo "Connecting with `{$coop_products_dbname}`...{$lf}";
+			echo "Connecting with {$coop_host} `{$coop_products_dbname}`...{$lf}";
 			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
 			try {
 				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
