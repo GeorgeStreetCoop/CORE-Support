@@ -347,6 +347,7 @@
 					array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => 0),
+					array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => 0),
 					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
 				);
 			foreach ($office_nonmembers as $office_nonmember) {
