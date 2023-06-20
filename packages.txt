@@ -1,5 +1,4 @@
 openssh-server
-usbmount
 git
 nginx
 mysql-server
@@ -7,6 +6,8 @@ php-fpm
 php-mysql
 phpmyadmin
 surf
-ttf-mscorefonts-installer
-numlockx
 ufw
+
+numlockx
+ttf-mscorefonts-installer
+usbmount
