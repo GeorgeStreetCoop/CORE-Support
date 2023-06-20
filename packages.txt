@@ -10,4 +10,3 @@ ufw
 
 numlockx
 ttf-mscorefonts-installer
-usbmount
