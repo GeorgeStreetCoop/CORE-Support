@@ -33,7 +33,7 @@ sed -i '/\bfannie\b/d' /etc/hosts
 sed -i '/\blane1\b/d' /etc/hosts
 sed -i '/\blane2\b/d' /etc/hosts
 sed -i '/\blane3\b/d' /etc/hosts
-sed -i '$a 192.168.1.50    fannie' /etc/hosts
+sed -i '$a 192.168.1.50    parsnip rambutan rutabaga fannie' /etc/hosts
 sed -i '$a 192.168.1.51    lane1' /etc/hosts
 sed -i '$a 192.168.1.52    lane2' /etc/hosts
 sed -i '$a 192.168.1.53    lane3' /etc/hosts
