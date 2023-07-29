@@ -52,5 +52,5 @@ INSERT taxrates
 	( id, rate, description )
 VALUES
 	( 1, 0.06625, 'Tax' ),
-	( 2, 0.06625, 'UEZ' )
+	( 2, 0.033125, 'UEZ' )
 ;
