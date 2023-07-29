@@ -13,7 +13,7 @@ fi
 apt-get install nginx
 
 
-# enable PHP 7.0 FPM (FastCGI Process Manager)
+# enable PHP FPM (FastCGI Process Manager)
 cmp -s "$SUPPORT/template.sites-available_default" /etc/nginx/sites-available/default || cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default~
 cp "$SUPPORT/template.sites-available_default" /etc/nginx/sites-available/default
 
@@ -28,9 +28,8 @@ echo 'Testing nginx configuration:'
 nginx -t
 
 
-# restart nginx and PHP 7.0 FPM
-service nginx restart
-service php7.0-fpm restart
+# restart nginx and PHP FPM
+systemctl restart php*-fpm.service nginx.service
 
 
 # set up lane URLs
