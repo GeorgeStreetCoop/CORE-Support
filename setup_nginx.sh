@@ -28,6 +28,10 @@ echo 'Testing nginx configuration:'
 nginx -t
 
 
+# let nginx through the firewall
+ufw allow 'Nginx HTTP'
+
+
 # restart nginx and PHP FPM
 systemctl restart php*-fpm.service nginx.service
 
