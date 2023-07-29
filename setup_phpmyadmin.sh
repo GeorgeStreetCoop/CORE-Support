@@ -14,6 +14,5 @@ ln -svf /usr/share/phpmyadmin "/var/www/html/phpmyadmin"
 phpenmod mcrypt
 
 
-# restart nginx and PHP 7.0 FPM
-service php7.0-fpm restart
-service nginx restart
+# restart nginx and PHP FPM
+systemctl restart php*-fpm.service nginx.service
