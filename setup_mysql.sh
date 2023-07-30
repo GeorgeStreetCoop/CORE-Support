@@ -35,10 +35,15 @@ if [ "$LANENUMBER" -gt 0 ]; then
 	# clean up passwords
 	unset MYSQL_ROOT_PW MYSQL_LANE_PW MYSQL_OFFICE_PW
 
+ 	# back up MySQL config
+	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf~
+
 	# allow remote mysql access by setting 'bind-address = 0.0.0.0' in /etc/mysql/mysql.conf.d/mysqld.cnf
 	HOST_IP=`hostname -I`
-	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf~
 	sed -i "s/^\s*#*\s*bind-address\(\s*=\s*\)127\.0\.0\.1\s*\$/bind-address\t= 0.0.0.0 # CORE-Support setup_mysql.sh\nsql-mode\t= NO_ENGINE_SUBSTITUTION # CORE-Support setup_mysql.sh/" /etc/mysql/mysql.conf.d/mysqld.cnf
+
+ 	# use legacy authentication for older Office server
+ 	echo -e "\n\ndefault_authentication_plugin = mysql_native_password\t# CORE-Support setup_mysql.sh legacy authentication for older Office server\n" >> mysqld.cnf
 fi
 
 
