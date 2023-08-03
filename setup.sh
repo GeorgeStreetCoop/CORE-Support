@@ -147,6 +147,9 @@ su -c "$SUPPORT/setup_user.sh" - cashier
 # set up George Street QuickMenus
 . "$SUPPORT/setup_quickmenus.sh"
 
+# set up George Street InventoryUpdateGSC plugin
+. "$SUPPORT/setup_inventory_update.sh"
+
 # set up any George Street code tweaks that aren't in master repo 
 . "$SUPPORT/setup_code_tweaks.sh"
 
