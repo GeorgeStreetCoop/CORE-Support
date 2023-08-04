@@ -51,8 +51,8 @@ class InventoryUpdateGSC extends Plugin
 		),
 		'LogFileName' => array(
 			'label' => 'Logfile name',
-			'description' => 'Filename to log to. Default is transaction_reset.log. For security reasons, directory path components will be ignored, and logging will always be to this plugin\'s own directory.',
-			'default' => 'transaction_reset.log',
+			'description' => 'Filename to log to. Default is inventory_update.log. For security reasons, directory path components will be ignored, and logging will always be to this plugin\'s own directory.',
+			'default' => 'inventory_update.log',
 		),
 	);
 
@@ -187,8 +187,9 @@ function logToFile($text)
 	if (!$log_filename) {
 		$log_filename = basename(CoreLocal::get('LogFileName'));
 		if (!$log_filename || $log_filename === basename(__FILE__)) // protect from overwriting this plugin!
-			$log_filename = 'transaction_reset.log';
-		$log_filename = dirname(__FILE__).'/'.$log_filename;
+			$log_filename = 'inventory_update.log';
+		$log_filename = dirname(__FILE__).'/'.$log_filename; // if plugin is symlinked, dirname(__FILE__) will return *target* dir of symlink
+
 		@unlink($log_filename);
 		if (!error_log(date('Y-m-d H:i:s')."\n", 3, $log_filename)) {
 			echo __FILE__.": Cannot log to designated logfile '{$log_filename}'".PHP_EOL;
