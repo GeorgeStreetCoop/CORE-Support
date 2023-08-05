@@ -28,4 +28,4 @@ cp "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
 
 # create alias to rewrite TM-T88III NVRAM slot 1 with Co-op logo;
 # we hold back from just rewriting it, because NVRAM can wear out from repeated rewrites!
-alias nv1cp="cp '$SUPPORT/GeorgeStreetCoopLogo_TMT88III.tlg' /dev/ttyS1"
+alias nv1cp="cp '$SUPPORT/GeorgeStreetCoopLogo_TMT88III.tlg' /CORE-Support/receipt_printer"

@@ -126,6 +126,10 @@ find "$COREPOS/pos/is4c-nf/" -maxdepth 1 -name is4c-nf -type l -delete
 . "$SUPPORT/setup_phpmyadmin.sh"
 
 
+# set up serial ports
+. "$SUPPORT/setup_serial.sh"
+
+
 # set up ssd boot process (systemd service since Ubuntu 15.04)
 . "$SUPPORT/setup_boot_systemd.sh"
 
