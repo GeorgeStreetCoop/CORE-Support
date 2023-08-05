@@ -20,7 +20,7 @@ fi
 
 # get password for mysql 'lane' user
 while [ -z "$RECEIPT_PRINTER" ]; do
-	read -s -p "Where is the receipt printer attached (usually '/dev/ttyS1' or '/dev/ttyUSB0'')? " RECEIPT_PRINTER
+	read -p "Where is the receipt printer attached (usually '/dev/ttyS1' or '/dev/ttyUSB0'')? " RECEIPT_PRINTER
 done
 
 ln -svf "$RECEIPT_PRINTER" "$SUPPORT/receipt_printer"
