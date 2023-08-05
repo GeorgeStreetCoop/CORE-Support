@@ -26,6 +26,7 @@ if [ "$LANENUMBER" -gt 0 ]; then
 	echo
 	read -p "Please enter the MySQL OFFICE password you'd like external lane data updates to use: " -s MYSQL_OFFICE_PW
 	echo
+	mysql -u root -p"$MYSQL_ROOT_PW" --force -e "ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PW';" # overrides default auth_socket authentication
 	mysql -u root -p"$MYSQL_ROOT_PW" --force -e "CREATE USER IF NOT EXISTS lane@localhost; ALTER USER lane@localhost IDENTIFIED WITH mysql_native_password BY '$MYSQL_LANE_PW';"
 	mysql -u root -p"$MYSQL_ROOT_PW" --force -e "CREATE USER IF NOT EXISTS office@'192.168.1.%'; ALTER USER office@'192.168.1.%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_OFFICE_PW';"
 
