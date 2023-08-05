@@ -105,11 +105,12 @@ class InventoryUpdateGSC extends Plugin
 					ORDER BY datetime DESC LIMIT 1
 				)
 			GROUP BY upc';
-		logQueryResults($translog_db, $latest_sale_q, $log_filename);
+		logQueryResults($translog_db, $latest_sale_q);
 		$latest_sale = $translog_db->query($latest_sale_q);
 
 		$base = 30;
 		$url_query = "?base={$base}&add_check_digit=1";
+		$has_records = false;
 		while ($row = $latest_sale->fetch(PDO::FETCH_ASSOC)) {
 			$has_records = true;
 			$upc = $row['upc'];
@@ -203,9 +204,10 @@ function logToFile($text)
 }
 
 
-function logQueryResults($db, $sql, $filepath)
+function logQueryResults($db, $sql)
 {
 	$q = $db->query($sql);
+	$out = '';
 	while ($row = $q->fetch(PDO::FETCH_ASSOC)) {
 		if (!$out) $out = join("\t", array_keys($row)) . "\n";
 		$out .= join("\t", $row) . "\n";
