@@ -186,7 +186,7 @@ function logToFile($text)
 	static $log_filename;
 
 	if (!$log_filename) {
-		$log_filename = basename(CoreLocal::get('LogFileName'));
+		$log_filename = basename(CoreLocal::get('InventoryUpdateLogfile'));
 		if (!$log_filename || $log_filename === basename(__FILE__)) // protect from overwriting this plugin!
 			$log_filename = 'inventory_update.log';
 		$log_filename = dirname(__FILE__).'/'.$log_filename; // if plugin is symlinked, dirname(__FILE__) will return *target* dir of symlink
