@@ -9,6 +9,7 @@ ExecStartPre=/bin/stty 9600 oddp crtscts -F /dev/ttyS0
 ExecStartPre=/bin/stty 19200 -parity -cstopb -echo raw -F /CORE-Support/receipt_printer
 ExecStart=/CORE-Support/ssddir/ssd
 PIDFile=/CORE-Support/ssddir/ssd.pid
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
