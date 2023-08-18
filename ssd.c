@@ -845,7 +845,10 @@ int main(int argc, char *argv[])
 			mode = WEIGHING;
 			if (strncmp(serialBuffer+4, lastWeight, 5) != 0) {
 				log_message(LOG_INFO, "Weighed (per monitor): %s (previous was %s)", serialBuffer+4, lastWeight);
-				write_serial("S334"); // monitor mode doesn't beep automatically; send good beep tone manually
+				// monitor mode doesn't beep automatically; send good beep tone manually if weight diff is 0.02lb or more
+				if (abs(atoi(lastWeight) - atoi(serialBuffer+4)) > 2) {
+					write_serial("S334");
+				}
 				write_file(scale_filepath, serialBuffer);
 				strcpy(lastWeight, serialBuffer+4);
 			}
