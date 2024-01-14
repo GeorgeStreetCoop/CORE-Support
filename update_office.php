@@ -180,209 +180,210 @@
 		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
 		if ($xfer_members) {
-			echo "Connecting with {$coop_host} `{$coop_member_dbname}`...{$lf}";
-			$coop_members_dsn = "mysql:dbname={$coop_member_dbname};host={$coop_host};charset=utf8";
-			try {
-				$coop_members_db = new PDO($coop_members_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
-				$coop_members_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
-			} catch (PDOException $e) {
-				echo "Co-op member DB connection ({$coop_members_dsn}) failed: " . $e->getMessage() . $lf;
-			}
+			$coop_members_hash_pass = substr(sha1(date('Ymd').'members'.$coop_pw), -12);
+			$coop_members_json = file_get_contents('https://'.$coop_host.'/members/_pos_members.php?hash='.$coop_members_hash_pass);
+			if ($coop_members_json) {
+				$coop_members = json_decode($coop_members_json, $associative = true);
+				$coop_member_keys = $coop_members['keys'];
+				$coop_members = $coop_members['data'];
 
-			$coop_members_q = $coop_members_db->query('SELECT * FROM MembersForIS4C');
+				$office_custdata_q = $office_db->prepare('
+						INSERT custdata
+						SET
+							CardNo = :card_no,
+							personNum = 1,
+							LastName = :last_name,
+							FirstName = :first_name,
+							CashBack = 20.00,
+							Balance = 0.00,
+							Discount = :discount,
+							MemDiscountLimit = 0.00,
+							ChargeLimit = 0.00,
+							ChargeOk = 0,
+							WriteChecks = IF(:discount, 1, 0),
+							StoreCoupons = 1,
+							Type = "PC",
+							memType = CONCAT(IF(:is_senior, "1", ""), IF(:is_staff, "9", FIELD(:discount, "5", "8", "15", "25"))),
+							staff = :is_staff,
+							SSI = :is_senior,
+							Purchases = 0.00,
+							NumberOfChecks = 0,
+							memCoupons = 0,
+							blueLine = CONCAT_WS(" ", :card_no, :first_name, :last_name),
+							Shown = 1,
+							LastChange = :modified,
+							id = :card_no
+						ON DUPLICATE KEY UPDATE
+							CardNo = :card_no,
+							personNum = 1,
+							LastName = :last_name,
+							FirstName = :first_name,
+							CashBack = 20.00,
+						--	Balance = 0.00,
+							Discount = :discount,
+						--	MemDiscountLimit = 0.00,
+						--	ChargeLimit = 0.00,
+						--	ChargeOk = 0,
+							WriteChecks = IF(:discount, 1, 0),
+						--	StoreCoupons = 1,
+							Type = "PC",
+							memType = CONCAT(IF(:is_senior, "1", ""), IF(:is_staff, "9", FIELD(:discount, "5", "8", "15", "25"))),
+							staff = :is_staff,
+							SSI = :is_senior,
+						--	Purchases = 0.00,
+						--	NumberOfChecks = 0,
+						--	memCoupons = 0,
+							blueLine = CONCAT_WS(" ", :card_no, :first_name, :last_name),
+							Shown = 1,
+							LastChange = :modified
+					');
 
-			$office_custdata_q = $office_db->prepare('
-					INSERT custdata
-					SET
-						CardNo = :card_no,
-						personNum = 1,
-						LastName = :last_name,
-						FirstName = :first_name,
-						CashBack = 20.00,
-						Balance = 0.00,
-						Discount = :discount,
-						MemDiscountLimit = 0.00,
-						ChargeLimit = 0.00,
-						ChargeOk = 0,
-						WriteChecks = IF(:discount, 1, 0),
-						StoreCoupons = 1,
-						Type = "PC",
-						memType = CONCAT(IF(:is_senior, "1", ""), IF(:is_staff, "9", FIELD(:discount, "5", "8", "15", "25"))),
-						staff = :is_staff,
-						SSI = :is_senior,
-						Purchases = 0.00,
-						NumberOfChecks = 0,
-						memCoupons = 0,
-						blueLine = CONCAT_WS(" ", :card_no, :first_name, :last_name),
-						Shown = 1,
-						LastChange = :modified,
-						id = :card_no
-					ON DUPLICATE KEY UPDATE
-						CardNo = :card_no,
-						personNum = 1,
-						LastName = :last_name,
-						FirstName = :first_name,
-						CashBack = 20.00,
-					--	Balance = 0.00,
-						Discount = :discount,
-					--	MemDiscountLimit = 0.00,
-					--	ChargeLimit = 0.00,
-					--	ChargeOk = 0,
-						WriteChecks = IF(:discount, 1, 0),
-					--	StoreCoupons = 1,
-						Type = "PC",
-						memType = CONCAT(IF(:is_senior, "1", ""), IF(:is_staff, "9", FIELD(:discount, "5", "8", "15", "25"))),
-						staff = :is_staff,
-						SSI = :is_senior,
-					--	Purchases = 0.00,
-					--	NumberOfChecks = 0,
-					--	memCoupons = 0,
-						blueLine = CONCAT_WS(" ", :card_no, :first_name, :last_name),
-						Shown = 1,
-						LastChange = :modified
-				');
+				$office_custdata_paramlist = array(
+						':card_no' => 0,
+						':discount' => 0,
+						':is_staff' => 0,
+						':is_senior' => 0,
+						':last_name' => 0,
+						':first_name' => 0,
+						':modified' => 0,
+					);
+				$office_meminfo_q = $office_db->prepare('
+						INSERT meminfo
+						SET
+							card_no = :card_no,
+							last_name = :last_name,
+							first_name = :first_name,
+							street = :street,
+							city = :city,
+							state = :state,
+							zip = :zip,
+							phone = :phone,
+							email_1 = :email_1,
+							ads_OK = :ads_OK,
+							modified = :modified
+						ON DUPLICATE KEY UPDATE
+							last_name = :last_name,
+							first_name = :first_name,
+							street = :street,
+							city = :city,
+							state = :state,
+							zip = :zip,
+							phone = :phone,
+							email_1 = :email_1,
+							ads_OK = :ads_OK,
+							modified = :modified
+					');
+				$office_meminfo_paramlist = array(
+						':card_no' => 0,
+						':last_name' => 0,
+						':first_name' => 0,
+						':street' => 0,
+						':city' => 0,
+						':state' => 0,
+						':zip' => 0,
+						':phone' => 0,
+						':email_1' => 0,
+						':ads_OK' => 0,
+						':modified' => 0,
+					);
+				$office_memdates_q = $office_db->prepare('
+						INSERT IGNORE memDates
+						SET
+							card_no = :card_no,
+							start_date = NULL,
+							end_date = NULL
+					');
+				$office_memdates_paramlist = array(
+						':card_no' => 0,
+					);
 
-			$office_custdata_paramlist = array(
-					':card_no' => 0,
-					':discount' => 0,
-					':is_staff' => 0,
-					':is_senior' => 0,
-					':last_name' => 0,
-					':first_name' => 0,
-					':modified' => 0,
-				);
-			$office_meminfo_q = $office_db->prepare('
-					INSERT meminfo
-					SET
-						card_no = :card_no,
-						last_name = :last_name,
-						first_name = :first_name,
-						street = :street,
-						city = :city,
-						state = :state,
-						zip = :zip,
-						phone = :phone,
-						email_1 = :email_1,
-						ads_OK = :ads_OK,
-						modified = :modified
-					ON DUPLICATE KEY UPDATE
-						last_name = :last_name,
-						first_name = :first_name,
-						street = :street,
-						city = :city,
-						state = :state,
-						zip = :zip,
-						phone = :phone,
-						email_1 = :email_1,
-						ads_OK = :ads_OK,
-						modified = :modified
-				');
-			$office_meminfo_paramlist = array(
-					':card_no' => 0,
-					':last_name' => 0,
-					':first_name' => 0,
-					':street' => 0,
-					':city' => 0,
-					':state' => 0,
-					':zip' => 0,
-					':phone' => 0,
-					':email_1' => 0,
-					':ads_OK' => 0,
-					':modified' => 0,
-				);
-			$office_memdates_q = $office_db->prepare('
-					INSERT IGNORE memDates
-					SET
-						card_no = :card_no,
-						start_date = NULL,
-						end_date = NULL
-				');
-			$office_memdates_paramlist = array(
-					':card_no' => 0,
-				);
+				flush();
+				foreach ($coop_members as $coop_member) {
+					$coop_member = array_combine($coop_member_keys, $coop_member);
+					set_time_limit(60);
 
-			flush();
-			while ($coop_member = $coop_members_q->fetch(PDO::FETCH_ASSOC)) {
-				set_time_limit(60);
-
-				$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = array();
-				foreach ($coop_member as $column => $value) {
-					$member_details[':'.$column] = $value;
-				}
-
-				// Make member name safe for current CORE-POS charset limitations
-				$member_details[':last_name'] = textASCII($member_details[':last_name']);
-				$member_details[':first_name'] = textASCII($member_details[':first_name']);
-
-				// Prepend SEN and EXP prefixes for Senior and Expired status
-				if ($coop_member['is_senior']) $member_details[':first_name'] = 'SEN '.$member_details[':first_name'];
-				if ($coop_member['is_expired']) $member_details[':first_name'] = 'EXP '.$member_details[':first_name'];
-
-				$office_custdata_params = array_intersect_key($member_details, $office_custdata_paramlist);
-				$office_meminfo_params = array_intersect_key($member_details, $office_meminfo_paramlist);
-				$office_memdates_params = array_intersect_key($member_details, $office_memdates_paramlist);
-
-				if (!($r = $office_custdata_q->execute($office_custdata_params)))
-					reportInsertError($office_custdata_q, $office_custdata_params);
-				if (!($s = $office_meminfo_q->execute($office_meminfo_params)))
-					reportInsertError($office_meminfo_q, $office_meminfo_params);
-				if (!($t = $office_memdates_q->execute($office_memdates_params)))
-					reportInsertError($office_memdates_q, $office_memdates_params);
-
-				if ($r && $s && $t) {
-					echo '.';
-					if (++$i % $line_length === 0) {
-						echo $lf;
-						flush();
+					$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = array();
+					foreach ($coop_member as $column => $value) {
+						$member_details[':'.$column] = $value;
 					}
-				}
-				elseif ((++$e >= 5) && ($e > $i * 5))
-					die;
-			} // while ($coop_member = $coop_members_q->fetch(PDO::FETCH_ASSOC))
 
-			// Add non-member POS lookups
-			$office_nonmembers = array(
-					array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => 0),
-					array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
-				);
-			foreach ($office_nonmembers as $office_nonmember) {
-				if (!($r = $office_custdata_q->execute($office_nonmember)))
-					reportInsertError($office_custdata_q, $office_nonmember);
-				if ($r) {
-					echo ',';
-					if (++$i % $line_length === 0) {
-						echo $lf;
-						flush();
-					}
-				}
-			} // foreach ($office_nonmembers as $office_nonmember)
+					// Make member name safe for current CORE-POS charset limitations
+					$member_details[':last_name'] = textASCII($member_details[':last_name']);
+					$member_details[':first_name'] = textASCII($member_details[':first_name']);
 
-			$member_sync_urls = array(
-					'custdata' => 'Synchronize Members to Lanes',
-					'memberCards' => 'Synchronize Member Cards to Lanes',
-					'memtype' => 'Synchronize Member Types to Lanes',
-				);
-			foreach ($member_sync_urls as $tablename => $label) {
-				$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
-				if ($sync_lanes) {
-					$data = file_get_contents('http:' . $url);
-					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
-					if ($is_cron) {
-						echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
+					// Prepend SEN and EXP prefixes for Senior and Expired status
+					if ($coop_member['is_senior']) $member_details[':first_name'] = 'SEN '.$member_details[':first_name'];
+					if ($coop_member['is_expired']) $member_details[':first_name'] = 'EXP '.$member_details[':first_name'];
+
+					$office_custdata_params = array_intersect_key($member_details, $office_custdata_paramlist);
+					$office_meminfo_params = array_intersect_key($member_details, $office_meminfo_paramlist);
+					$office_memdates_params = array_intersect_key($member_details, $office_memdates_paramlist);
+
+					if (!($r = $office_custdata_q->execute($office_custdata_params)))
+						reportInsertError($office_custdata_q, $office_custdata_params);
+					if (!($s = $office_meminfo_q->execute($office_meminfo_params)))
+						reportInsertError($office_meminfo_q, $office_meminfo_params);
+					if (!($t = $office_memdates_q->execute($office_memdates_params)))
+						reportInsertError($office_memdates_q, $office_memdates_params);
+
+					if ($r && $s && $t) {
+						echo '.';
+						if (++$i % $line_length === 0) {
+							echo $lf;
+							flush();
+						}
 					}
-				}
-				elseif (!$is_cron) {
+					elseif ((++$e >= 5) && ($e > $i * 5))
+						die;
+				} // foreach ($coop_members as $coop_member)
+
+				// Add non-member POS lookups
+				$office_nonmembers = array(
+						array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
+					);
+				foreach ($office_nonmembers as $office_nonmember) {
+					if (!($r = $office_custdata_q->execute($office_nonmember)))
+						reportInsertError($office_custdata_q, $office_nonmember);
+					if ($r) {
+						echo ',';
+						if (++$i % $line_length === 0) {
+							echo $lf;
+							flush();
+						}
+					}
+				} // foreach ($office_nonmembers as $office_nonmember)
+
+				$member_sync_urls = array(
+						'custdata' => 'Synchronize Members to Lanes',
+						'memberCards' => 'Synchronize Member Cards to Lanes',
+						'memtype' => 'Synchronize Member Types to Lanes',
+					);
+				foreach ($member_sync_urls as $tablename => $label) {
+					$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
+					if ($sync_lanes) {
+						$data = file_get_contents('http:' . $url);
+						$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+						if ($is_cron) {
+							echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
+						}
+					}
+					elseif (!$is_cron) {
 ?>
-				<br>
-				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
+					<br>
+					<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
 <?php
-				}
-			} // foreach ($member_sync_urls as $tablename => $label)
+					}
+				} // foreach ($member_sync_urls as $tablename => $label)
+			}
+			else {
+				echo "<b style=\"color:red\">Failed to fetch {$coop_host} member data!</b>{$lf}";				
+			} // if ($coop_members_json)
 			echo $lf.$hr.$lf;
 			flush();
 		} // if ($xfer_members)
