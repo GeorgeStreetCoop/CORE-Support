@@ -157,7 +157,7 @@
 			parse_str($arg, $arg_parsed);
 			$invoke_params += $arg_parsed;
 		}
-	}
+	} // if (count($_POST)) elseif ($_SERVER['argv'])
 
 	if (isset($invoke_params)) {
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
@@ -177,7 +177,7 @@
 				echo 'Office connection failed: ' . $e->getMessage() . $lf;
 			}
 			echo $hr.$lf;
-		}
+		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
 		if ($xfer_members) {
 			echo "Connecting with {$coop_host} `{$coop_member_dbname}`...{$lf}";
@@ -338,7 +338,7 @@
 				}
 				elseif ((++$e >= 5) && ($e > $i * 5))
 					die;
-			}
+			} // while ($coop_member = $coop_members_q->fetch(PDO::FETCH_ASSOC))
 
 			// Add non-member POS lookups
 			$office_nonmembers = array(
@@ -360,7 +360,7 @@
 						flush();
 					}
 				}
-			}
+			} // foreach ($office_nonmembers as $office_nonmember)
 
 			$member_sync_urls = array(
 					'custdata' => 'Synchronize Members to Lanes',
@@ -382,10 +382,10 @@
 				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
 <?php
 				}
-			}
+			} // foreach ($member_sync_urls as $tablename => $label)
 			echo $lf.$hr.$lf;
 			flush();
-		}
+		} // if ($xfer_members)
 
 		if ($xfer_products || $xfer_sales) {
 			echo "Connecting with {$coop_host} `{$coop_products_dbname}`...{$lf}";
@@ -396,7 +396,7 @@
 			} catch (PDOException $e) {
 				echo "Co-op product DB connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
-		}
+		} // if ($xfer_products || $xfer_sales)
 
 		if ($xfer_products) {
 			$coop_products_q = $coop_products_db->query('SELECT * FROM ProductsForIS4C');
@@ -440,7 +440,7 @@ if ($use_prepared) {
 						default_vendor_id = :default_vendor_id,
 						id = :id
 				');
-}
+} // if ($use_prepared)
 			flush();
 			while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
 				set_time_limit(60);
@@ -479,8 +479,8 @@ else {
 					);
 				if ($r !== false)
 					echo '.';
-}
-			}
+} // if ($use_prepared)
+			} // while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC))
 
 if ($use_prepared) {
 			// Add non-product POS lookups
@@ -497,7 +497,7 @@ if ($use_prepared) {
 						flush();
 					}
 				}
-			}
+			} // foreach ($office_nonproducts as $office_nonproduct)
 }
 else {
 			$office_nonproduct = [
@@ -527,7 +527,7 @@ else {
 				echo ';';
 			echo "<br>\n";
 			flush();
-}
+} // if ($use_prepared)
 
 			$product_sync_urls = array(
 					'products' => 'Synchronize Products to Lanes',
@@ -550,7 +550,7 @@ else {
 			}
 			echo $lf.$hr.$lf;
 			flush();
-		}
+		} // if ($xfer_products)
 
 
 		if ($xfer_sales) {
@@ -624,7 +624,7 @@ else {
 								upc
 						)',
 
-				];
+				]; // $sales_fetch_sqls
 
 			$header_sql = "REPLACE ProductSales\n";
 			$header_sql .= "\t(Source, UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
@@ -665,7 +665,7 @@ else {
 						if (!$r) {
 							echo "{$lf}— error clearing date range in sales table: " . $sales_clear_q->errorInfo()[2] . $lf;
 						}
-					}
+					} // if (!$sales_clear_q)
 
 					while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND)) {
 
@@ -697,7 +697,7 @@ else {
 							usleep(10);
 							set_time_limit(60);
 							$date_records = $date_gross = $date_net = $date_reported_gross = $date_reported_net = 0;
-						}
+						} // if ($header_sale_date != $sale_date)
 
 						// set up new row
 						$upc_corrected = $upc . getCheckDigit($upc);
@@ -725,15 +725,16 @@ else {
 								$total_reported_gross += $gross_price;
 								$date_reported_net += $gross_price - $member_discount - $senior_discount;
 								$total_reported_net += $gross_price - $member_discount - $senior_discount;
-						}
+						} // switch ($department)
 
 						$values_sql = "\n\t('CORE-POS', {$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
 						// echo "<pre style='background-color:#ffd;font:8px Courier'>".htmlspecialchars($values_sql)."</pre>";
 						$values_sqls[] = $values_sql;
-					}
+					} // while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND))
 				}
+				// if (!$r) else
+			} // foreach ($sales_fetch_sqls as $sales_fetch_sql)
 
-			}
 			if ($header_sale_date && count($values_sqls)) {
 				$insert_sql = $header_sql . join(",", $values_sqls);
 				// echo "<pre style='background-color:#dff;font:8px Courier'>".htmlspecialchars($insert_sql)."</pre>";
@@ -749,7 +750,7 @@ else {
 					echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
 					$total_records += $date_records;
 				}
-			}
+			} // if ($header_sale_date && count($values_sqls))
 
 			$sales_end_time = microtime(1);
 			$total_duration = number_format($sales_end_time - $sales_start_time, 3);
@@ -763,55 +764,56 @@ else {
 			$total_reported_gross = '$'.number_format($total_reported_gross, 2);
 			$total_reported_net = '$'.number_format($total_reported_net, 2);
 			echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
-		}
-	}
+		} // if ($xfer_sales)
 
-	for ($i = 1; $i <= 3; $i++) {
-		$lane_ip = "192.168.1.5{$i}";
-		$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
-		$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
-		$lane_up = $lane_loss < 50;
+		for ($i = 1; $i <= 3; $i++) { // iterate lanes
+			$lane_ip = "192.168.1.5{$i}";
+			$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
+			$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
+			$lane_up = $lane_loss < 50;
 
-		$lane_status = $lane_up? 'UP' : 'DOWN';
-		if ($lane_up && strlen($OFFICE_SERVER_PW)) {
-			$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
-			try {
-				$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 1));
-				$lane_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
-				$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
-				if ($lane_login['LoggedIn']) {
-					$lane_status = trim($lane_login['Cashier'], ' .');
-					$lane_transcount = $lane_db->query('SELECT COUNT(*) FROM core_translog.localtemptrans');
-					if (is_object($lane_transcount)) {
-						$lane_transcount = $lane_transcount->fetch(PDO::FETCH_NUM);
-						if ($lane_transcount[0])
-							$lane_status .= ' in transaction';
-						else
-							$lane_status .= ' logged in';
+			$lane_status = $lane_up? 'UP' : 'DOWN';
+			if ($lane_up && strlen($OFFICE_SERVER_PW)) {
+				$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
+				try {
+					$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 1));
+					$lane_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
+					$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
+					if ($lane_login['LoggedIn']) {
+						$lane_status = trim($lane_login['Cashier'], ' .');
+						$lane_transcount = $lane_db->query('SELECT COUNT(*) FROM core_translog.localtemptrans');
+						if (is_object($lane_transcount)) {
+							$lane_transcount = $lane_transcount->fetch(PDO::FETCH_NUM);
+							if ($lane_transcount[0])
+								$lane_status .= ' in transaction';
+							else
+								$lane_status .= ' logged in';
+						}
+						else {
+							$lane_status .= ' (couldn’t determine transaction status)';
+						}
 					}
 					else {
-						$lane_status .= ' (couldn’t determine transaction status)';
+						$lane_status = 'Logged out';
 					}
+					$lane_db = null;
+				} catch (PDOException $e) {
+					$lane_status = 'ERROR: '.$e->getMessage();
+					$lane_up = false;
 				}
-				else {
-					$lane_status = 'Logged out';
-				}
-				$lane_db = null;
-			} catch (PDOException $e) {
-				$lane_status = 'ERROR: '.$e->getMessage();
-				$lane_up = false;
 			}
-		}
-		if ($is_cron)
-			$lane_status_tag = '';
-		elseif ($lane_up)
-			$lane_status_tag = '<b style="color:green">';
-		else
-			$lane_status_tag = '<b style="color:red">';
-		$lane_status_tag_end = (strlen($lane_status_tag)? '</b>' : '');
-		echo "Lane {$i} ({$lane_ip}): {$lane_status_tag}{$lane_status}{$lane_status_tag_end}{$lf}";
-		flush();
-	}
+			if ($is_cron)
+				$lane_status_tag = '';
+			elseif ($lane_up)
+				$lane_status_tag = '<b style="color:green">';
+			else
+				$lane_status_tag = '<b style="color:red">';
+			$lane_status_tag_end = (strlen($lane_status_tag)? '</b>' : '');
+			echo "Lane {$i} ({$lane_ip}): {$lane_status_tag}{$lane_status}{$lane_status_tag_end}{$lf}";
+			flush();
+		} // for ($i = 1; $i <= 3; $i++) // iterate lanes
+	} // if (isset($invoke_params))
+
 	if ($is_cron) {
 		@file_put_contents('.update_office.done', date('Y-m-d H:i:s'));
 	}
