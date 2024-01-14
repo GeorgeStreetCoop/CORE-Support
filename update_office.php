@@ -179,6 +179,7 @@
 			echo $hr.$lf;
 		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
+
 		if ($xfer_members) {
 			$coop_members_hash_pass = substr(sha1(date('Ymd').'members'.$coop_pw), -12);
 			$coop_members_json = file_get_contents('https://'.$coop_host.'/members/_pos_members.php?hash='.$coop_members_hash_pass);
@@ -388,7 +389,174 @@
 			flush();
 		} // if ($xfer_members)
 
-		if ($xfer_products || $xfer_sales) {
+
+		if ($xfer_products) {
+			$coop_products_hash_pass = substr(sha1(date('Ymd').'products'.$coop_pw), -12);
+			$coop_products_json = file_get_contents('https://'.$coop_host.'/products/_pos_products.php?hash='.$coop_products_hash_pass);
+			if ($coop_products_json) {
+				$coop_products = json_decode($coop_products_json, $associative = true);
+				$coop_product_keys = $coop_products['keys'];
+				$coop_products = $coop_products['data'];
+
+				$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
+if ($use_prepared) {
+				$office_products_q = $office_db->prepare('
+						INSERT products
+						SET
+							upc = :upc,
+							description = :description,
+							brand = :brand,
+							normal_price = :normal_price,
+							department = :department,
+							tax = :tax,
+							foodstamp = :foodstamp,
+							scale = :scale,
+							discount = 1,
+							wicable = :wicable,
+							qttyEnforced = :qttyEnforced,
+							cost = :cost,
+							inUse = :inUse,
+							deposit = :deposit,
+							default_vendor_id = :default_vendor_id,
+							id = :id
+						ON DUPLICATE KEY UPDATE
+							upc = :upc,
+							description = :description,
+							brand = :brand,
+							normal_price = :normal_price,
+							department = :department,
+							tax = :tax,
+							foodstamp = :foodstamp,
+							scale = :scale,
+-- 							discount = 1,
+-- 							wicable = :wicable,
+							qttyEnforced = :qttyEnforced,
+							cost = :cost,
+							inUse = :inUse,
+							deposit = :deposit,
+							default_vendor_id = :default_vendor_id,
+							id = :id
+					');
+} // if ($use_prepared)
+				flush();
+				foreach ($coop_products as $coop_product) {
+					$coop_product = array_combine($coop_product_keys, $coop_product);
+					set_time_limit(60);
+
+if ($use_prepared) {
+					$coop_products_params = array();
+					foreach ($coop_product as $column => $value) {
+						$coop_products_params[':'.$column] = $value;
+					}
+
+					// Make brand and description safe for current CORE-POS charset limitations
+					$coop_products_params[':brand'] = textASCII($coop_products_params[':brand']);
+					$coop_products_params[':description'] = textASCII($coop_products_params[':description']);
+
+					if (!($r = $office_products_q->execute($coop_products_params)))
+						reportInsertError($office_products_q, $coop_products_params);
+
+					if ($r) {
+						echo '.';
+						if (++$i % $line_length === 0) {
+							echo $lf;
+							flush();
+						}
+					}
+					elseif ((++$e >= 5) && ($e > $i * 5))
+						die;
+}
+else {
+					$coop_products_copy = $coop_product;
+					$coop_products_copy['brand'] = textASCII($coop_product['brand']);
+					$coop_products_copy['description'] = textASCII($coop_product['description']);
+					$coop_products_copy['discount'] = 1;
+
+					$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
+							'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
+							$coop_products_copy
+						);
+					if ($r !== false)
+						echo '.';
+} // if ($use_prepared)
+				} // foreach ($coop_products as $coop_product)
+
+if ($use_prepared) {
+				// Add non-product POS lookups
+				$office_nonproducts = [
+						[':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111],
+					];
+				foreach ($office_nonproducts as $office_nonproduct) {
+					if (!($r = $office_products_q->execute($office_nonproduct)))
+						reportInsertError($office_products_q, $office_nonproduct);
+					if ($r) {
+						echo ',';
+						if (++$i % $line_length === 0) {
+							echo $lf;
+							flush();
+						}
+					}
+				} // foreach ($office_nonproducts as $office_nonproduct)
+}
+else {
+				$office_nonproduct = [
+						'upc' => '0000000091111',
+						'description' => $asof_date,
+						'brand' => '',
+						'normal_price' => 0,
+						'department' => 0,
+						'tax' => 0,
+						'foodstamp' => 0,
+						'scale' => 0,
+						'wicable' => 0,
+						'qttyEnforced' => 0,
+						'cost' => 0,
+						'inUse' => 1,
+						'deposit' => NULL,
+						'default_vendor_id' => NULL,
+						'id' => 91111,
+						'discount' => 0,
+					];
+				$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
+						'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
+						$office_nonproduct,
+						true
+					);
+				if ($r !== false)
+					echo ';';
+				echo "<br>\n";
+				flush();
+} // if ($use_prepared)
+
+				$product_sync_urls = array(
+						'products' => 'Synchronize Products to Lanes',
+					);
+				foreach ($product_sync_urls as $tablename => $label) {
+					$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
+					if ($sync_lanes) {
+						$data = file_get_contents('http:' . $url);
+						$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
+						if ($is_cron) {
+							echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
+						}
+					}
+					elseif (!$is_cron) {
+?>
+					<br>
+					<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
+<?php
+					}
+				}
+			}
+			else {
+				echo "<b style=\"color:red\">Failed to fetch {$coop_host} product data!</b>{$lf}";				
+			} // if ($coop_products_json)
+			echo $lf.$hr.$lf;
+			flush();
+		} // if ($xfer_products)
+
+
+		if ($xfer_sales) {
 			echo "Connecting with {$coop_host} `{$coop_products_dbname}`...{$lf}";
 			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
 			try {
@@ -397,164 +565,7 @@
 			} catch (PDOException $e) {
 				echo "Co-op product DB connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
 			}
-		} // if ($xfer_products || $xfer_sales)
 
-		if ($xfer_products) {
-			$coop_products_q = $coop_products_db->query('SELECT * FROM ProductsForIS4C');
-
-			$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
-if ($use_prepared) {
-			$office_products_q = $office_db->prepare('
-					INSERT products
-					SET
-						upc = :upc,
-						description = :description,
-						brand = :brand,
-						normal_price = :normal_price,
-						department = :department,
-						tax = :tax,
-						foodstamp = :foodstamp,
-						scale = :scale,
-						discount = 1,
-						wicable = :wicable,
-						qttyEnforced = :qttyEnforced,
-						cost = :cost,
-						inUse = :inUse,
-						deposit = :deposit,
-						default_vendor_id = :default_vendor_id,
-						id = :id
-					ON DUPLICATE KEY UPDATE
-						upc = :upc,
-						description = :description,
-						brand = :brand,
-						normal_price = :normal_price,
-						department = :department,
-						tax = :tax,
-						foodstamp = :foodstamp,
-						scale = :scale,
-	--					discount = 1,
-	--					wicable = :wicable,
-						qttyEnforced = :qttyEnforced,
-						cost = :cost,
-						inUse = :inUse,
-						deposit = :deposit,
-						default_vendor_id = :default_vendor_id,
-						id = :id
-				');
-} // if ($use_prepared)
-			flush();
-			while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC)) {
-				set_time_limit(60);
-if ($use_prepared) {
-				$coop_products_params = array();
-				foreach ($coop_product as $column => $value) {
-					$coop_products_params[':'.$column] = $value;
-				}
-
-				// Make brand and description safe for current CORE-POS charset limitations
-				$coop_products_params[':brand'] = textASCII($coop_products_params[':brand']);
-				$coop_products_params[':description'] = textASCII($coop_products_params[':description']);
-
-				if (!($r = $office_products_q->execute($coop_products_params)))
-					reportInsertError($office_products_q, $coop_products_params);
-
-				if ($r) {
-					echo '.';
-					if (++$i % $line_length === 0) {
-						echo $lf;
-						flush();
-					}
-				}
-				elseif ((++$e >= 5) && ($e > $i * 5))
-					die;
-}
-else {
-				$coop_products_copy = $coop_product;
-				$coop_products_copy['brand'] = textASCII($coop_product['brand']);
-				$coop_products_copy['description'] = textASCII($coop_product['description']);
-				$coop_products_copy['discount'] = 1;
-
-				$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
-						'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
-						$coop_products_copy
-					);
-				if ($r !== false)
-					echo '.';
-} // if ($use_prepared)
-			} // while ($coop_product = $coop_products_q->fetch(PDO::FETCH_ASSOC))
-
-if ($use_prepared) {
-			// Add non-product POS lookups
-			$office_nonproducts = [
-					[':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111],
-				];
-			foreach ($office_nonproducts as $office_nonproduct) {
-				if (!($r = $office_products_q->execute($office_nonproduct)))
-					reportInsertError($office_products_q, $office_nonproduct);
-				if ($r) {
-					echo ',';
-					if (++$i % $line_length === 0) {
-						echo $lf;
-						flush();
-					}
-				}
-			} // foreach ($office_nonproducts as $office_nonproduct)
-}
-else {
-			$office_nonproduct = [
-					'upc' => '0000000091111',
-					'description' => $asof_date,
-					'brand' => '',
-					'normal_price' => 0,
-					'department' => 0,
-					'tax' => 0,
-					'foodstamp' => 0,
-					'scale' => 0,
-					'wicable' => 0,
-					'qttyEnforced' => 0,
-					'cost' => 0,
-					'inUse' => 1,
-					'deposit' => NULL,
-					'default_vendor_id' => NULL,
-					'id' => 91111,
-					'discount' => 0,
-				];
-			$r = pdoBulkInsertOp('REPLACE', $office_db, 'products',
-					'upc, description, brand, normal_price, department, tax, foodstamp, scale, wicable, qttyEnforced, cost, inUse, deposit, default_vendor_id, id, discount',
-					$office_nonproduct,
-					true
-				);
-			if ($r !== false)
-				echo ';';
-			echo "<br>\n";
-			flush();
-} // if ($use_prepared)
-
-			$product_sync_urls = array(
-					'products' => 'Synchronize Products to Lanes',
-				);
-			foreach ($product_sync_urls as $tablename => $label) {
-				$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
-				if ($sync_lanes) {
-					$data = file_get_contents('http:' . $url);
-					$checkbox = strlen($data)? ' <b style="color:green">√</b>' : '';
-					if ($is_cron) {
-						echo $lf . (strlen($data)? "Synced table `{$tablename}`" : "Table `{$tablename}` sync failed!");
-					}
-				}
-				elseif (!$is_cron) {
-?>
-				<br>
-				<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?php
-				}
-			}
-			echo $lf.$hr.$lf;
-			flush();
-		} // if ($xfer_products)
-
-
-		if ($xfer_sales) {
 			$sales_start_time = microtime(1);
 
 			$sales_fetch_sqls = [
