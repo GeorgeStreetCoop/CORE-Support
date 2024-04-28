@@ -1,6 +1,4 @@
 <?php
-	$use_prepared = false;
-
 	$is_cron = (php_sapi_name() == 'cli');
 	$lf = ($is_cron? "\n" : "<br>\n");
 	$hr = ($is_cron? '' : "<br>\n");
@@ -162,12 +160,15 @@
 	if (isset($invoke_params)) {
 		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
 		extract($invoke_params);
-		$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
-		$time = time();
-		$asof_date = 'as of '.date('M j Y g:ia', $time);
-		$asof_hash = date('Y-m-d_His', $time);
 
+
+		/*** SET UP TRANSFER(S) ***/
 		if ($xfer_members || $xfer_products || $xfer_sales) {
+			$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
+			$time = time();
+			$asof_date = 'as of '.date('M j Y g:ia', $time);
+			$asof_hash = date('Y-m-d_His', $time);
+
 			echo "Connecting with {$OFFICE_SERVER} `{$OFFICE_OP_DBNAME}`...{$lf}";
 			$office_dsn = "mysql:dbname={$OFFICE_OP_DBNAME};host={$OFFICE_SERVER};charset=utf8";
 			try {
@@ -180,6 +181,7 @@
 		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
 
+		/*** MEMBER DATA TRANSFER ***/
 		if ($xfer_members) {
 			$coop_members_hash_pass = substr(sha1(date('Ymd').'members'.$coop_pw), -12);
 			$coop_members_json = file_get_contents('https://'.$coop_host.'/members/_pos_members.php?hash='.$coop_members_hash_pass);
@@ -375,10 +377,7 @@
 						}
 					}
 					elseif (!$is_cron) {
-?>
-					<br>
-					<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?php
+						echo "<br>\n<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
 					}
 				} // foreach ($member_sync_urls as $tablename => $label)
 			}
@@ -390,6 +389,7 @@
 		} // if ($xfer_members)
 
 
+		/*** PRODUCT DATA TRANSFER ***/
 		if ($xfer_products) {
 			$coop_products_hash_pass = substr(sha1(date('Ymd').'products'.$coop_pw), -12);
 			$coop_products_json = file_get_contents('https://'.$coop_host.'/products/_pos_products.php?hash='.$coop_products_hash_pass);
@@ -399,74 +399,13 @@
 				$coop_products = $coop_products['data'];
 
 				$office_db->exec('UPDATE products SET inUse = 0 WHERE upc < 100000');
-if ($use_prepared) {
-				$office_products_q = $office_db->prepare('
-						INSERT products
-						SET
-							upc = :upc,
-							description = :description,
-							brand = :brand,
-							normal_price = :normal_price,
-							department = :department,
-							tax = :tax,
-							foodstamp = :foodstamp,
-							scale = :scale,
-							discount = 1,
-							wicable = :wicable,
-							qttyEnforced = :qttyEnforced,
-							cost = :cost,
-							inUse = :inUse,
-							deposit = :deposit,
-							default_vendor_id = :default_vendor_id,
-							id = :id
-						ON DUPLICATE KEY UPDATE
-							upc = :upc,
-							description = :description,
-							brand = :brand,
-							normal_price = :normal_price,
-							department = :department,
-							tax = :tax,
-							foodstamp = :foodstamp,
-							scale = :scale,
--- 							discount = 1,
--- 							wicable = :wicable,
-							qttyEnforced = :qttyEnforced,
-							cost = :cost,
-							inUse = :inUse,
-							deposit = :deposit,
-							default_vendor_id = :default_vendor_id,
-							id = :id
-					');
-} // if ($use_prepared)
+
 				flush();
 				foreach ($coop_products as $coop_product) {
 					$coop_product = array_combine($coop_product_keys, $coop_product);
 					set_time_limit(60);
 
-if ($use_prepared) {
-					$coop_products_params = array();
-					foreach ($coop_product as $column => $value) {
-						$coop_products_params[':'.$column] = $value;
-					}
 
-					// Make brand and description safe for current CORE-POS charset limitations
-					$coop_products_params[':brand'] = textASCII($coop_products_params[':brand']);
-					$coop_products_params[':description'] = textASCII($coop_products_params[':description']);
-
-					if (!($r = $office_products_q->execute($coop_products_params)))
-						reportInsertError($office_products_q, $coop_products_params);
-
-					if ($r) {
-						echo '.';
-						if (++$i % $line_length === 0) {
-							echo $lf;
-							flush();
-						}
-					}
-					elseif ((++$e >= 5) && ($e > $i * 5))
-						die;
-}
-else {
 					$coop_products_copy = $coop_product;
 					$coop_products_copy['brand'] = textASCII($coop_product['brand']);
 					$coop_products_copy['description'] = textASCII($coop_product['description']);
@@ -478,27 +417,8 @@ else {
 						);
 					if ($r !== false)
 						echo '.';
-} // if ($use_prepared)
 				} // foreach ($coop_products as $coop_product)
 
-if ($use_prepared) {
-				// Add non-product POS lookups
-				$office_nonproducts = [
-						[':upc' => '0000000091111', ':description' => $asof_date, ':brand' => '', ':normal_price' => 0, ':department' => 0, ':tax' => 0, ':foodstamp' => 0, ':scale' => 0, ':wicable' => 0, ':qttyEnforced' => 0, ':cost' => 0, ':inUse' => 1, ':deposit' => NULL, ':default_vendor_id' => NULL, ':id' => 91111],
-					];
-				foreach ($office_nonproducts as $office_nonproduct) {
-					if (!($r = $office_products_q->execute($office_nonproduct)))
-						reportInsertError($office_products_q, $office_nonproduct);
-					if ($r) {
-						echo ',';
-						if (++$i % $line_length === 0) {
-							echo $lf;
-							flush();
-						}
-					}
-				} // foreach ($office_nonproducts as $office_nonproduct)
-}
-else {
 				$office_nonproduct = [
 						'upc' => '0000000091111',
 						'description' => $asof_date,
@@ -526,7 +446,6 @@ else {
 					echo ';';
 				echo "<br>\n";
 				flush();
-} // if ($use_prepared)
 
 				$product_sync_urls = array(
 						'products' => 'Synchronize Products to Lanes',
@@ -541,10 +460,7 @@ else {
 						}
 					}
 					elseif (!$is_cron) {
-?>
-					<br>
-					<a href="<?=$url?>" target="<?=$tablename?>"><?=$label?></a><?=$synced?>
-<?php
+						echo "<br>\n<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
 					}
 				}
 			}
@@ -556,6 +472,7 @@ else {
 		} // if ($xfer_products)
 
 
+		/*** SALES DATA TRANSFER ***/
 		if ($xfer_sales) {
 			echo "Connecting with {$coop_host} `{$coop_products_dbname}`...{$lf}";
 			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
@@ -778,6 +695,8 @@ else {
 			echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
 		} // if ($xfer_sales)
 
+
+		/*** LANE STATUSES ***/
 		for ($i = 1; $i <= 3; $i++) { // iterate lanes
 			$lane_ip = "192.168.1.5{$i}";
 			$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
@@ -824,6 +743,8 @@ else {
 			echo "Lane {$i} ({$lane_ip}): {$lane_status_tag}{$lane_status}{$lane_status_tag_end}{$lf}";
 			flush();
 		} // for ($i = 1; $i <= 3; $i++) // iterate lanes
+
+
 	} // if (isset($invoke_params))
 
 	if ($is_cron) {
@@ -935,6 +856,17 @@ function textASCII($text_utf8)
 	}
 // 	echo "<span style=\"color:green\">“".($text_ascii)."”</span><br>\n";
 	return $text_ascii;
+}
+
+
+function compactTable($table)
+// turns 2d associative table array into a 1d header list PLUS 2d value array
+// saves lots of space in large 2d associative arrays
+{
+	return [
+		'header' => array_keys(current($table)),
+		'values' => array_map('array_values', $table)
+	];
 }
 
 
