@@ -1,7 +1,7 @@
 <?php
 	$is_cron = (php_sapi_name() == 'cli');
 	$lf = ($is_cron? "\n" : "<br>\n");
-	$hr = ($is_cron? '' : "<br>\n");
+	$hr = ($is_cron? '' : "<hr>\n");
 	$line_length = ($is_cron? 75 : 250);
 
 	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -162,7 +162,7 @@
 		extract($invoke_params);
 
 
-		/*** SET UP TRANSFER(S) ***/
+		//*** SET UP TRANSFER(S) ***
 		if ($xfer_members || $xfer_products || $xfer_sales) {
 			$office_server_sync_url_base = "//{$OFFICE_SERVER}/{$OFFICE_SERVER_URL_BASE}/sync/TableSyncPage.php";
 			$time = time();
@@ -181,7 +181,7 @@
 		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
 
-		/*** MEMBER DATA TRANSFER ***/
+		//*** MEMBER DATA TRANSFER ***
 		if ($xfer_members) {
 			$coop_members_hash_pass = substr(sha1(date('Ymd').'members'.$coop_pw), -12);
 			$coop_members_json = file_get_contents('https://'.$coop_host.'/members/_pos_members.php?hash='.$coop_members_hash_pass);
@@ -378,7 +378,7 @@
 						}
 					}
 					elseif (!$is_cron) {
-						echo "<br>\n<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
+						echo "{$lf}<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
 					}
 				} // foreach ($member_sync_urls as $tablename => $label)
 			}
@@ -390,7 +390,7 @@
 		} // if ($xfer_members)
 
 
-		/*** PRODUCT DATA TRANSFER ***/
+		//*** PRODUCT DATA TRANSFER ***
 		if ($xfer_products) {
 			$coop_products_hash_pass = substr(sha1(date('Ymd').'products'.$coop_pw), -12);
 			$coop_products_json = file_get_contents('https://'.$coop_host.'/products/_pos_products.php?hash='.$coop_products_hash_pass);
@@ -405,7 +405,6 @@
 				foreach ($coop_products as $coop_product) {
 					$coop_product = array_combine($coop_product_keys, $coop_product);
 					set_time_limit(60);
-
 
 					$coop_products_copy = $coop_product;
 					$coop_products_copy['brand'] = textASCII($coop_product['brand']);
@@ -445,7 +444,7 @@
 					);
 				if ($r !== false)
 					echo ';';
-				echo "<br>\n";
+				echo $lf;
 				flush();
 
 				$product_sync_urls = array(
@@ -461,7 +460,7 @@
 						}
 					}
 					elseif (!$is_cron) {
-						echo "<br>\n<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
+						echo "{$lf}<a href=\"{$url}\" target=\"{$tablename}\">{$label}</a>{$synced}";
 					}
 				}
 			}
@@ -473,18 +472,9 @@
 		} // if ($xfer_products)
 
 
-		/*** SALES DATA TRANSFER ***/
+		//*** SALES DATA TRANSFER ***
 		if ($xfer_sales) {
-			echo "Connecting with {$coop_host} `{$coop_products_dbname}`...{$lf}";
-			$coop_products_dsn = "mysql:dbname={$coop_products_dbname};host={$coop_host};charset=utf8";
-			try {
-				$coop_products_db = new PDO($coop_products_dsn, $coop_user, $coop_pw, array(PDO::ATTR_TIMEOUT => 10));
-				$coop_products_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
-			} catch (PDOException $e) {
-				echo "Co-op product DB connection ({$coop_products_dsn}) failed: " . $e->getMessage() . $lf;
-			}
-
-			$sales_start_time = microtime(1);
+			$coop_sales_hash_pass = substr(sha1(date('Ymd').'sales'.$coop_pw), -12);
 
 			$sales_fetch_sqls = [
 
@@ -556,17 +546,14 @@
 
 				]; // $sales_fetch_sqls
 
-			$header_sql = "REPLACE ProductSales\n";
-			$header_sql .= "\t(Source, UPC, SaleDate, Department, ItemCount, GrossPrice, MemberDiscount, SeniorDiscount, LastUpdate)\n";
-			$header_sql .= "VALUES";
-
+			$dated_sales_rows = [];
 			foreach ($sales_fetch_sqls as $sales_fetch_sql) {
 				$sales_fetch_q = $office_db->prepare($sales_fetch_sql);
-				$params = array(
-						':start_date' => $start_date,
-						':end_date' => $end_date,
-					);
-				$r = $sales_fetch_q->execute($params);
+				$date_range_p = [
+					':start_date' => $start_date,
+					':end_date' => $end_date,
+				];
+				$r = $sales_fetch_q->execute($date_range_p);
 
 				if (!$r) {
 					echo "{$lf}— error querying CORE-POS: " . $sales_fetch_q->errorInfo()[2] . $lf;
@@ -582,63 +569,16 @@
 					$sales_fetch_q->bindColumn('MemberDiscount', $member_discount);
 					$sales_fetch_q->bindColumn('SeniorDiscount', $senior_discount);
 
-					// clear destination range (but only once per data transfer!)
-					if (!$sales_clear_q) {
-						// echo "<pre style='background-color:#fdd;font:8px Courier'>DELETE FROM ProductSales WHERE SaleDate BETWEEN '$start_date' AND '$end_date'</pre>";
-						$sales_clear_q = $coop_products_db->prepare('
-								DELETE FROM ProductSales
-								WHERE
-									Source = "CORE-POS"
-									AND SaleDate BETWEEN :start_date AND :end_date
-							');
-						$r = $sales_clear_q->execute($params);
-						if (!$r) {
-							echo "{$lf}— error clearing date range in sales table: " . $sales_clear_q->errorInfo()[2] . $lf;
-						}
-					} // if (!$sales_clear_q)
-
 					while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND)) {
-
-						// are we on a new date? if so, send old day's data (if it exists)
-						// echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars("$header_sale_date != $sale_date? (".count($values_sqls).")")."</pre>";
-						// echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars("$sale_date_nice: $upc")."</pre>";
-						if ($header_sale_date != $sale_date) {
-							if ($header_sale_date) {
-								$insert_sql = $header_sql . join(",", $values_sqls);
-								// echo "<pre style='background-color:#ddf;font:8px Courier'>".htmlspecialchars($insert_sql)."</pre>";
-								$r = $coop_products_db->exec($insert_sql);
-								if (!$r) {
-									echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
-								}
-								else {
-									$date_gross = '$'.number_format($date_gross, 2);
-									$date_net = '$'.number_format($date_net, 2);
-									$date_reported_gross = '$'.number_format($date_reported_gross, 2);
-									$date_reported_net = '$'.number_format($date_reported_net, 2);
-									echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
-									$total_records += $date_records;
-								}
-							}
-							$header_sale_date = $sale_date;
-							$values_sqls = array();
-
-							echo $sale_date_nice;
-							flush();
-							usleep(10);
-							set_time_limit(60);
-							$date_records = $date_gross = $date_net = $date_reported_gross = $date_reported_net = 0;
-						} // if ($header_sale_date != $sale_date)
-
-						// set up new row
-						$upc_corrected = $upc . getCheckDigit($upc);
-						$upcs_changed += ($upc_corrected === $upc? 0 : 1);
-
 						if ($date_records++ % 5 === 0)
 							echo '.';
 
-						$date_gross += $gross_price;
+						$upc_corrected = $upc . getCheckDigit($upc);
+						$upcs_changed += ($upc_corrected === $upc? 0 : 1);
+
+						$date_gross[$sale_date] += $gross_price;
 						$total_gross += $gross_price;
-						$date_net += $gross_price - $member_discount - $senior_discount;
+						$date_net[$sale_date] += $gross_price - $member_discount - $senior_discount;
 						$total_net += $gross_price - $member_discount - $senior_discount;
 
 						switch ($department) {
@@ -657,47 +597,63 @@
 								$total_reported_net += $gross_price - $member_discount - $senior_discount;
 						} // switch ($department)
 
-						$values_sql = "\n\t('CORE-POS', {$upc_corrected}, '{$sale_date}', {$department}, {$item_count}, {$gross_price}, {$member_discount}, {$senior_discount}, NOW())";
-						// echo "<pre style='background-color:#ffd;font:8px Courier'>".htmlspecialchars($values_sql)."</pre>";
-						$values_sqls[] = $values_sql;
+						// formatting tweaks applied here save about 9% on transmitted data size
+						$sales_row = [
+							'CORE-POS',
+							$upc_corrected <= 99999999? (int)$upc_corrected : str_pad(ltrim($upc_corrected, 0), 12, 0, STR_PAD_LEFT),
+							$sale_date,
+							(int)$department,
+							ctype_digit($item_count)? (int)$item_count : $item_count,
+							$gross_price,
+							$member_discount == 0? 0 : $member_discount,
+							$senior_discount == 0? 0 : $senior_discount,
+						];
+						// echo "<pre style='background-color:#ffd;font:8px Courier'>".join(', ', $sales_row)."</pre>";
+						$dated_sales_rows[$sale_date][] = $sales_row;
+
 					} // while ($f = $sales_fetch_q->fetch(PDO::FETCH_BOUND))
-				}
-				// if (!$r) else
+				} // else if (!$r)
 			} // foreach ($sales_fetch_sqls as $sales_fetch_sql)
 
-			if ($header_sale_date && count($values_sqls)) {
-				$insert_sql = $header_sql . join(",", $values_sqls);
-				// echo "<pre style='background-color:#dff;font:8px Courier'>".htmlspecialchars($insert_sql)."</pre>";
-				$r = $coop_products_db->exec($insert_sql);
-				if (!$r) {
-					echo "{$lf}— error inserting data for {$header_sale_date}: " . $coop_products_db->errorInfo()[2] . $lf;
+// 			echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars(var_export($dated_sales_rows, true))."</pre>";
+
+			$sales_headers = [
+				'Source',
+				'UPC',
+				'SaleDate',
+				'Department',
+				'ItemCount',
+				'GrossPrice',
+				'MemberDiscount',
+				'SeniorDiscount',
+			];
+			foreach ($dated_sales_rows as $sale_date => $rows_for_date) {
+
+				$postdata = [
+					'hash' => $coop_sales_hash_pass,
+					'replace' => $sale_date,
+					'header' => $sales_headers,
+					'data' => $rows_for_date,
+				];
+// 				echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars(var_export($postdata, true))."</pre>";
+				$result = httpPost('https://georgestreetcoop.com/products/_pos_sales.php', $postdata, $json = true);
+// 				echo "<pre style='background-color:#fdd;font:8px Courier'>".htmlspecialchars($result)."</pre>";
+
+				if (strpos($result, 'SUCCESS') === false) {
+					echo "{$lf}— error inserting data for {$sale_date}: " . htmlspecialchars($result) . $lf;
 				}
 				else {
-					$date_gross = '$'.number_format($date_gross, 2);
-					$date_net = '$'.number_format($date_net, 2);
-					$date_reported_gross = '$'.number_format($date_reported_gross, 2);
-					$date_reported_net = '$'.number_format($date_reported_net, 2);
-					echo "{$date_records} records; {$date_gross} gross, {$date_net} net, {$date_reported_gross} reported gross, {$date_reported_net} reported net{$lf}";
-					$total_records += $date_records;
+					echo '.';
 				}
-			} // if ($header_sale_date && count($values_sqls))
+				flush();
+			} // foreach ($dated_sales_rows as $sale_date => $rows_for_date)
 
-			$sales_end_time = microtime(1);
-			$total_duration = number_format($sales_end_time - $sales_start_time, 3);
-			$overall_rate = number_format($total_records / ($sales_end_time - $sales_start_time), 3);
-			$total_records = number_format($total_records);
-			$upcs_changed = number_format($upcs_changed);
-			echo "{$lf}Exported {$total_records} total records (adding {$upcs_changed} checksums) in {$total_duration} seconds, {$overall_rate} records/second average.{$lf}";
-
-			$total_gross = '$'.number_format($total_gross, 2);
-			$total_net = '$'.number_format($total_net, 2);
-			$total_reported_gross = '$'.number_format($total_reported_gross, 2);
-			$total_reported_net = '$'.number_format($total_reported_net, 2);
-			echo "{$total_gross} total gross, {$total_net} total net, {$total_reported_gross} total reported gross, {$total_reported_net} total reported net{$lf}{$lf}";
+			echo $lf.$hr.$lf;
+			flush();
 		} // if ($xfer_sales)
 
 
-		/*** LANE STATUSES ***/
+		//*** LANE STATUSES ***
 		for ($i = 1; $i <= 3; $i++) { // iterate lanes
 			$lane_ip = "192.168.1.5{$i}";
 			$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
@@ -749,12 +705,10 @@
 	} // if (isset($invoke_params))
 
 	if ($is_cron) {
-		@file_put_contents('.update_office.done', date('Y-m-d H:i:s'));
+// 		@file_put_contents('.update_office.done', date('Y-m-d H:i:s'));
 	}
 	else {
-?>
-</body>
-<?php
+		echo "</body>\n";
 	}
 
 
@@ -843,7 +797,7 @@ function textASCII($text_utf8)
 	if ($text_ascii === $text_utf8)
 		return $text_ascii;
 
-// 	echo "<br>\n<span style=\"color:red\">“".($text_utf8)."”</span> → ";
+// 	echo "{$lf}<span style=\"color:red\">“".($text_utf8)."”</span> → ";
 	if ($ret === false) {
 		// Should be extremely rare to reach this point — possibly due to collation issues.
 		// Split the string, process each character we can recognize.
@@ -855,20 +809,38 @@ function textASCII($text_utf8)
 				$text_ascii .= $char_ascii;
 		}
 	}
-// 	echo "<span style=\"color:green\">“".($text_ascii)."”</span><br>\n";
+// 	echo "<span style=\"color:green\">“".($text_ascii)."”</span>{$lf}";
 	return $text_ascii;
 }
 
 
-function compactTable($table)
-// turns 2d associative table array into a 1d header list PLUS 2d value array
-// saves lots of space in large 2d associative arrays
+function httpPost($url, $data, $json = false)
 {
-	return [
-		'header' => array_keys(current($table)),
-		'values' => array_map('array_values', $table)
+	if (!is_string($data)) {
+		$data = $json?
+				json_encode($data)
+				:
+				http_build_query($data)
+			;
+	}
+
+	$options = [
+		'http' => [ // use key 'http' even if you send the request to https://...
+			'method' => 'POST',
+			'header' => 'Content-type: '.($json? 'application/json' : 'application/x-www-form-urlencoded'),
+			'content' => $data,
+		],
 	];
+
+	$context = stream_context_create($options);
+	if (!$context) return '(couldn’t create POST stream context!)';
+
+	$result = file_get_contents($url, false, $context);
+	if ($result === false) return "(couldn’t connect to {$url}!)";
+
+	return $result;
 }
+
 
 
 function pdoBulkInsertOp($operation, $db, $tablename, $fieldnames, $values, $trigger=100)
