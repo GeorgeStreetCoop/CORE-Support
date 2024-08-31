@@ -17,6 +17,8 @@ $my_menu = array(
 		'Tomato Basil Soup, 16oz' => '294',
 		'Tomato Soup w/ Garden Vegetables, 12oz' => '143',
 		'Tomato Soup w/ Garden Vegetables, 16oz' => '144',
+		'White Bean & Escarole Soup, 12oz' => '153',
+		'White Bean & Escarole Soup, 16oz' => '154',
 
 		'(other budget soup), 12oz' => '103',
 		'(other budget soup), 16oz' => '104',
