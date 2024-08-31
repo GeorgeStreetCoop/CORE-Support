@@ -13,6 +13,8 @@ $my_menu = array(
 		'Roasted Vegetable Soup, 16oz' => '134',
 		'Three Bean Chili, 12oz' => '263',
 		'Three Bean Chili, 16oz' => '264',
+		'Tomato Basil Soup, 12oz' => '293',
+		'Tomato Basil Soup, 16oz' => '294',
 		'Tomato Soup w/ Garden Vegetables, 12oz' => '143',
 		'Tomato Soup w/ Garden Vegetables, 16oz' => '144',
 
