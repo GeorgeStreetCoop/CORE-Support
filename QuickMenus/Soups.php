@@ -1,6 +1,8 @@
 <?php
 
 $my_menu = array(
+		'Black Bean Soup, 12oz' => '223',
+		'Black Bean Soup, 16oz' => '224',
 		'Carrot Ginger Soup, 12oz' => '113',
 		'Carrot Ginger Soup, 16oz' => '114',
 		'Chipotle Sweet Potato Soup, 12oz' => '283',
