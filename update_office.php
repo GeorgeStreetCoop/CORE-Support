@@ -930,9 +930,12 @@ function pdoBulkInsertOp($operation, $db, $tablename, $fieldnames, $values, $tri
 			!$values // can trigger query by providing empty $values array
 			||
 			(
-				is_numeric($trigger) || ctype_digit($trigger)?
-				(count($inserts) >= $trigger) // can trigger query by providing numeric $trigger
-				: $trigger // can trigger query by providing $trigger = true
+				is_bool($trigger)? $trigger : // can use explicit boolean $trigger
+				(
+					is_numeric($trigger) || ctype_digit($trigger)
+					 	? count($inserts) >= $trigger // can give numeric threshold $trigger
+						: true // for safety's sake, any other value always triggers
+				)
 			)
 		) {
 
