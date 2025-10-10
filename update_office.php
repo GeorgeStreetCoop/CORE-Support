@@ -826,7 +826,7 @@ function textASCII($text_utf8)
 
 	if (empty($map)) {
 		foreach ($map_alphabetics as $to => $froms) {
-			foreach (preg_split('//u', $froms, null, PREG_SPLIT_NO_EMPTY) as $from) {
+			foreach (preg_split('//u', $froms, -1, PREG_SPLIT_NO_EMPTY) as $from) {
 				$map[$from] = $to;
 				$map[mb_convert_case($from, MB_CASE_UPPER, "UTF-8")] = mb_convert_case($to, MB_CASE_UPPER, "UTF-8");
 			}
