@@ -348,14 +348,14 @@
 
 				// Add non-member POS lookups
 				$office_nonmembers = array(
-						array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 111, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => '5% for a Day discount', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => 0),
-						array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => 0),
+						array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 111, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => '5% for a Day discount', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => '2016-02-02'),
+						array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => '2016-02-02'),
 					);
 				foreach ($office_nonmembers as $office_nonmember) {
 					if (!($r = $office_custdata_q->execute($office_nonmember)))
