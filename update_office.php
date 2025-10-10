@@ -696,7 +696,7 @@
 
 			for ($i = 1; $i <= 3; $i++) { // iterate lanes
 				$lane_ip = "192.168.1.5{$i}";
-				$lane_ping = shell_exec("ping -q -t2 -c3 {$lane_ip}");
+				$lane_ping = shell_exec("ping -c3 -i.2 -t2 -q {$lane_ip}"); // 3 pings .2sec apart, TTL=2, quiet
 				$lane_loss = preg_match('~ ([0-9.]+)% packet loss~', $lane_ping, $matches)? floatval($matches[1]) : 100;
 				$lane_up = $lane_loss < 50;
 
