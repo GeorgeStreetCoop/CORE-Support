@@ -161,7 +161,7 @@
 		extract($invoke_params);
 
 
-		//*** SET UP TRANSFER(S) ***
+		// *** SET UP TRANSFER(S) ***
 		if ($xfer_members || $xfer_products || $xfer_sales) {
 			echo $hr;
 
@@ -183,7 +183,7 @@
 		} // if ($xfer_members || $xfer_products || $xfer_sales)
 
 
-		//*** MEMBER DATA TRANSFER ***
+		// *** MEMBER DATA TRANSFER ***
 		if ($xfer_members) {
 			echo $hr;
 			echo "Sending member data from {$coop_host} to `{$OFFICE_OP_DBNAME}`:{$lf}";
@@ -395,7 +395,7 @@
 		} // if ($xfer_members)
 
 
-		//*** PRODUCT DATA TRANSFER ***
+		// *** PRODUCT DATA TRANSFER ***
 		if ($xfer_products) {
 			echo $hr;
 			echo "Sending product data from {$coop_host} to `{$OFFICE_OP_DBNAME}`:{$lf}";
@@ -480,7 +480,7 @@
 		} // if ($xfer_products)
 
 
-		//*** SALES DATA TRANSFER ***
+		// *** SALES DATA TRANSFER ***
 		if ($xfer_sales) {
 			echo $hr;
 			echo "Fetching sales data from `{$OFFICE_OP_DBNAME}`:";
@@ -690,7 +690,7 @@
 		} // if ($xfer_sales)
 
 
-		//*** LANE STATUSES ***
+		// *** LANE STATUSES ***
 		if ($xfer_members || $xfer_products) {
 			echo $hr;
 
