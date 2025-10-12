@@ -1,6 +1,9 @@
+# generally install this as an after-midnight cron task on the office backend server
+# do NOT run this on the lanes!
+
 # office_trans transaction tables
 #   dlog_15: dlog_90_view from past 15 days [TransArchiveTask->reloadDlog15($sql)]
-#   dtransactions: today's transactions
+#   dtransactions: all transactions since last TransArchiveTask (bigArchive) transfer; usually just one day
 #   transarchive: everything from past 92 days [TransArchiveTask->rotateQuarter($sql, $dates)]
 
 # office_trans transaction views
@@ -8,13 +11,13 @@
 #   dlog_90_view: transarchive where trans_status not in (D, X, Z) and emp_no != 9999 and register_no != 99
 
 # office_trans_archive transaction tables
-#   bigarchive: seems to be everything (3200)
+#   bigarchive: complete transaction history; uses MySQL PARTITIONs to accommodate this
 
 # office_trans_archive transaction views
 #   dlogbig: bigarchive where trans_status not in (D, X, Z) and emp_no != 9999 and register_no != 99
 
 
-echo "Running CORE-POS tasks..."
+echo "Running CORE-POS office backend tasks..."
 echo
 
 # products -> productBackup; custdata -> custdataBackup
