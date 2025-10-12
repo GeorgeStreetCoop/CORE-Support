@@ -44,8 +44,12 @@ static public function setPrintHandler($ph)
  */
 static public function get($session)
 {
-	$receipt = ReceiptLib::biggerFont("Transaction Summary")."\n\n";
-	$receipt .= ReceiptLib::biggerFont(date('D M j Y - g:ia'))."\n\n";
+	$receipt = '';
+
+	$receipt .= ReceiptLib::normalFont();
+	$receipt .= ReceiptLib::biggerFont("Transaction Summary")."\n\n";
+	$receipt .= ReceiptLib::biggerFont(date('D M j Y g:ia'))."\n\n";
+
 	$report_params = array();
 
 	$lane_db = Database::tDataConnect();
@@ -54,9 +58,8 @@ static public function get($session)
 	if ($lane_db->isConnected('core_translog')) {
 		$this_lane = $session->get('laneno');
 		$opdata_dbname = 'core_opdata';
-		
-// 		$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
-		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
+		$transarchive = 'localtrans'; // gets large if overnight truncation never takes place
+// 		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
 
 		$report_params += array(
 			"Lane {$this_lane} tender" => "
@@ -72,7 +75,7 @@ static public function get($session)
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'T'
-						AND DATE_FORMAT(d.datetime, '%Y-%m-%d') = (SELECT MAX(DATE_FORMAT(datetime, '%Y-%m-%d')) FROM {$transarchive})
+						AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 					GROUP BY t.tenderName
 					ORDER BY
 						FIELD(d.trans_subtype, 'CA', 'CK', 'CC', 'DC', 'EF', d.trans_subtype),
@@ -91,8 +94,8 @@ static public function get($session)
 		$office_db = $lane_db;
 		$office_dbname = $lane_dbname;
 		$opdata_dbname = 'core_opdata';
-// 		$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
-		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
+		$transarchive = 'localtrans'; // gets large if overnight truncation never takes place
+// 		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
 	}
 	else {
 		$office_host = $session->get('mServer'); // hostname or IP
@@ -103,10 +106,10 @@ static public function get($session)
 
 		// check that we're even routable to the office server
 		$office_ping = shell_exec("ping -c3 -i.2 -t2 -q {$office_host}"); // 3 pings .2sec apart, TTL=2, quiet
-		if (preg_match('~0 packets received~', $office_ping))
+		if (preg_match('~0( packets)? received~', $office_ping)) // some ping versions say "packets", some don't
 			$office_fail = 'not responding to ping';
 	
-		// if rouatable, check that the office server is accepting MySQL connections
+		// if routable, check that the office server is accepting MySQL connections
 		if (!$office_fail) {
 			ini_set('default_socket_timeout', 3); // sets timeout for pingport()'s call to stream_socket_client()
 			if (!MiscLib::pingport($office_host, $office_dbms))
@@ -121,25 +124,27 @@ static public function get($session)
 		}
 
 		if ($office_fail) {
+			$lane_warning = " (lane {$this_lane} only)";
+
 			$receipt .= "\n";
 			$receipt .= ReceiptLib::boldFont();
 			$receipt .= "{$office_host} {$office_fail}.\n";
-			$receipt .= "Printing lane data only.";
+			$receipt .= ReceiptLib::biggerFont("Printing lane data only.");
 			$receipt .= ReceiptLib::normalFont();
 			$receipt .= "\n";
 
 			$office_db = $lane_db;
 			$office_dbname = $lane_dbname;
 			$opdata_dbname = 'core_opdata';
-
-// 			$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
-			$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
+			$transarchive = 'localtrans'; // gets large if overnight truncation never takes place
+// 			$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
 		}
 		else {
-			$opdata_dbname = 'office_opdata';
+			$lane_warning = '';
 
-// 			$transarchive = 'dtransactions'; // truncated each night, may show no data if we run reports late
-			$transarchive = 'transarchive'; // has last 90 days of data
+			$opdata_dbname = 'office_opdata';
+			$transarchive = 'dtransactions'; // truncated each night, may show no data if we run reports late
+// 			$transarchive = 'transarchive'; // has last 90 days of data, but not today's
 		}
 
 		$report_params += array(
@@ -156,7 +161,7 @@ static public function get($session)
 						WHERE d.emp_no != 9999 AND d.register_no != 99
 							AND d.trans_status != 'X'
 							AND d.department != 0
-							AND DATE_FORMAT(d.datetime, '%Y-%m-%d') = (SELECT MAX(DATE_FORMAT(datetime, '%Y-%m-%d')) FROM {$transarchive})
+							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY t.dept_no
 					",
 			'tax' => "
@@ -171,7 +176,7 @@ static public function get($session)
 						WHERE d.emp_no != 9999 AND d.register_no != 99
 							AND d.trans_status != 'X'
 							AND d.trans_type = 'A' AND d.upc = 'TAX'
-							AND DATE_FORMAT(d.datetime, '%Y-%m-%d') = (SELECT MAX(DATE_FORMAT(datetime, '%Y-%m-%d')) FROM {$transarchive})
+							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY (total = 0)
 					",
 			'discount' => "
@@ -186,7 +191,7 @@ static public function get($session)
 						WHERE d.emp_no != 9999 AND d.register_no != 99
 							AND d.trans_status != 'X'
 							AND d.trans_type = 'S' AND d.upc = 'DISCOUNT'
-							AND DATE_FORMAT(d.datetime, '%Y-%m-%d') = (SELECT MAX(DATE_FORMAT(datetime, '%Y-%m-%d')) FROM {$transarchive})
+							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY percentDiscount
 					",
 			'tender' => "
@@ -202,7 +207,7 @@ static public function get($session)
 						WHERE d.emp_no != 9999 AND d.register_no != 99
 							AND d.trans_status != 'X'
 							AND d.trans_type = 'T'
-							AND DATE_FORMAT(d.datetime, '%Y-%m-%d') = (SELECT MAX(DATE_FORMAT(datetime, '%Y-%m-%d')) FROM {$transarchive})
+							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY t.tenderName
 						ORDER BY
 							FIELD(d.trans_subtype, 'CA', 'CK', 'CC', 'DC', 'EF', d.trans_subtype),
@@ -217,7 +222,7 @@ static public function get($session)
 		$is_office_query = !preg_match('~^Lane ~', $report);
 
 		$receipt .= ReceiptLib::boldFont();
-		$receipt .= ReceiptLib::centerString(ucwords($report).' Report')."\n";
+		$receipt .= ReceiptLib::centerString(ucwords($report).' Report'.$lane_warning)."\n";
 		$receipt .= ReceiptLib::normalFont();
 
 		try {
@@ -318,6 +323,7 @@ static public function get($session)
 	$receipt .= str_repeat("\n", 4);
 	$receipt .= chr(27).chr(105); // cut
 
+// 	die('<pre>'.$receipt.'</pre>'); // uncomment to debug this in-browser (save paper!)
 	return $receipt;
 }
 
