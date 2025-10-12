@@ -23,6 +23,7 @@
 
 namespace COREPOS\pos\lib\ReceiptBuilding\TenderReports;
 use COREPOS\pos\lib\Database;
+use COREPOS\pos\lib\MiscLib;
 use COREPOS\pos\lib\ReceiptLib;
 
 /**
@@ -35,7 +36,7 @@ static protected $print_handler;
 
 static public function setPrintHandler($ph)
 {
-    self::$print_handler = $ph;
+	self::$print_handler = $ph;
 }
 
 /** 
@@ -43,15 +44,20 @@ static public function setPrintHandler($ph)
  */
 static public function get($session)
 {
-    $receipt = ReceiptLib::biggerFont("Transaction Summary")."\n\n";
-    $receipt .= ReceiptLib::biggerFont(date('D M j Y - g:ia'))."\n\n";
+	$receipt = ReceiptLib::biggerFont("Transaction Summary")."\n\n";
+	$receipt .= ReceiptLib::biggerFont(date('D M j Y - g:ia'))."\n\n";
 	$report_params = array();
 
 	$lane_db = Database::tDataConnect();
-    if ($lane_db->isConnected('core_translog')) {
-	    $this_lane = $session->get('laneno');
-		$transarchive = 'localtranstoday';
+	$lane_dbname = $session->get('tDatabase'); // 'lane';
+
+	if ($lane_db->isConnected('core_translog')) {
+		$this_lane = $session->get('laneno');
 		$opdata_dbname = 'core_opdata';
+		
+// 		$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
+		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
+
 		$report_params += array(
 			"Lane {$this_lane} tender" => "
 					SELECT
@@ -82,39 +88,58 @@ static public function get($session)
 		$receipt .= ReceiptLib::normalFont();
 		$receipt .= "\n";
 
-		$office_db = Database::tDataConnect();
-		$office_dbname = $session->get('tDatabase'); //'lane';
-		$transarchive = 'localtrans';
+		$office_db = $lane_db;
+		$office_dbname = $lane_dbname;
 		$opdata_dbname = 'core_opdata';
+// 		$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
+		$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
 	}
 	else {
-		$office_host = $session->get('mServer');
-		$office_ping = shell_exec("ping -q -t2 -c3 {$office_host}");
-		$office_live = (preg_match('~0 packets received~', $office_ping)? false : true);
+		$office_host = $session->get('mServer'); // hostname or IP
+		$office_dbms = $session->get('mDBMS');
+		$office_dbname = $session->get('mDatabase'); // database name e.g. 'office';
 
-		if ($office_live) {
+		$office_fail = false;
+
+		// check that we're even routable to the office server
+		$office_ping = shell_exec("ping -c3 -i.2 -t2 -q {$office_host}"); // 3 pings .2sec apart, TTL=2, quiet
+		if (preg_match('~0 packets received~', $office_ping))
+			$office_fail = 'not responding to ping';
+	
+		// if rouatable, check that the office server is accepting MySQL connections
+		if (!$office_fail) {
+			ini_set('default_socket_timeout', 3); // sets timeout for pingport()'s call to stream_socket_client()
+			if (!MiscLib::pingport($office_host, $office_dbms))
+				$office_fail = "refused {$office_dbms} TCP connect";
+		}
+
+		// if office server is accepting MySQL connections, attempt connection
+		if (!$office_fail) {
 			$office_db = Database::mDataConnect();
-			if (!$office_db->isConnected($session->get('mDatabase'))) {
-				$office_live = false;
-			}
+			if (!$office_db->isConnected($office_dbname))
+				$office_fail = "refused {$office_dbname} access";
 		}
 
-		if ($office_live) {
-			$office_dbname = $session->get('mDatabase'); //'office';
-			$transarchive = 'dtransactions';
-			$opdata_dbname = 'office_opdata';
-		}
-		else {
+		if ($office_fail) {
 			$receipt .= "\n";
 			$receipt .= ReceiptLib::boldFont();
-			$receipt .= "Server is unavailable; printing lane data only.";
+			$receipt .= "{$office_host} {$office_fail}.\n";
+			$receipt .= "Printing lane data only.";
 			$receipt .= ReceiptLib::normalFont();
 			$receipt .= "\n";
 
-			$office_db = Database::tDataConnect();
-			$office_dbname = $session->get('tDatabase'); //'lane';
-			$transarchive = 'localtrans';
+			$office_db = $lane_db;
+			$office_dbname = $lane_dbname;
 			$opdata_dbname = 'core_opdata';
+
+// 			$transarchive = 'localtrans'; // gets too large if overnight truncation never takes place
+			$transarchive = 'localtranstoday'; // truncated each night, may show no data if we run reports late
+		}
+		else {
+			$opdata_dbname = 'office_opdata';
+
+// 			$transarchive = 'dtransactions'; // truncated each night, may show no data if we run reports late
+			$transarchive = 'transarchive'; // has last 90 days of data
 		}
 
 		$report_params += array(
@@ -189,17 +214,28 @@ static public function get($session)
 	foreach ($report_params as $report => $query) {
 		$receipt .= "\n";
 
+		$is_office_query = !preg_match('~^Lane ~', $report);
+
 		$receipt .= ReceiptLib::boldFont();
 		$receipt .= ReceiptLib::centerString(ucwords($report).' Report')."\n";
 		$receipt .= ReceiptLib::normalFont();
 
-		$result = $office_db->query($query);
-		if (!$result) $result = $lane_db->query($query);
+		try {
+			if ($is_office_query)
+				$result = $office_db->query($query);
+			else
+				$result = $lane_db->query($query);
+			$rows = $result->GetAll();
+		}
+		catch (Exception $e) {
+			$receipt .= "$report error: ".$e->getMessage()."\n\n";
+			continue;
+		}
 
 		$total_quantity = $total_value = 0;
 		$plural = $group_label = $group_quantity = $group_quantity_label = $group_value = '';
 
-		while ($row = $office_db->fetchRow($result)) {
+		foreach ($rows as $row) {
 			$plural = $row['Plural'];
 			$group_label = $row['GroupLabel'];
 			$group_quantity = $row['GroupQuantity'];
@@ -217,27 +253,19 @@ static public function get($session)
 			$receipt .= ReceiptLib::normalFont();
 			$receipt .= "\${$group_value} from {$group_quantity} {$group_quantity_label}".($group_quantity==1?'':'s')."\n";
 		}
-		switch ($report) {
-			case 'department':
-			case 'tax':
-			case 'discount':
-			case 'tender':
-				$total_values[$report] = $total_value;
-			default:
-		}
+		if ($is_office_query)
+			$total_values[$report] = $total_value;
 
 		$total_quantity = rtrim(number_format($total_quantity, 3), '.0');
 		$total_value = number_format($total_value, 2);
 
 		$receipt .= ReceiptLib::boldFont();
-		if ($plural) {
+		if ($plural)
 			$receipt .= "All ".ucwords($plural).": \${$total_value} from {$total_quantity} {$group_quantity_label}".($total_quantity==1?'':'s')."\n";
-		}
-		else {
-			$receipt .= "No data match in {$office_dbname}.{$transarchive}\n";
-		}
+		else
+			$receipt .= "No matching data found in ".($is_office_query? $office_dbname : $lane_dbname)."\n";
 		$receipt .= ReceiptLib::normalFont();
-	}
+	} // foreach ($report_params as $report => $query)
 
 	$checksum = 0;
 	$receipt .= "\n";
@@ -264,7 +292,8 @@ static public function get($session)
 		$receipt .= ReceiptLib::normalFont();
 		$receipt .= str_repeat(' ', 32 - strlen("{$report}{$total_value}"));
 		$receipt .= ($sign < 0? '-' : '+') . " \${$total_value}";
-	}
+	} // foreach ($total_values as $report => $total_value)
+
 	if ($sign) {
 		$checksum = number_format($checksum, 2);
 		if ($checksum === '-0.00') $checksum = '0.00'; // remove possible floating point sign error
@@ -281,15 +310,15 @@ static public function get($session)
 		$receipt .= ReceiptLib::normalFont();
 	}
 
-    $receipt .= "\n";
-    $receipt .= "\n";
-    $receipt .= ReceiptLib::centerString("------------------------------------------------------");
-    $receipt .= "\n";
+	$receipt .= "\n";
+	$receipt .= "\n";
+	$receipt .= ReceiptLib::centerString("------------------------------------------------------");
+	$receipt .= "\n";
 
-    $receipt .= str_repeat("\n", 4);
-    $receipt .= chr(27).chr(105); // cut
-    return $receipt;
+	$receipt .= str_repeat("\n", 4);
+	$receipt .= chr(27).chr(105); // cut
+
+	return $receipt;
 }
 
 }
-
