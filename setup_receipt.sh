@@ -20,10 +20,12 @@ fi
 
 # use custom TenderReport.php which prepends tender report classpath to bare classnames
 # see http://github.com/CORE-POS/IS4C/issues/980
-cp "$SUPPORT/TenderReport.php" "$RECEIPTS/TenderReports/"
+rm -f "$RECEIPTS/TenderReports/TenderReport.php"
+ln -s "$SUPPORT/TenderReport.php" "$RECEIPTS/TenderReports/"
 
 # add George Street end-of-day report to "stock" versions
-cp "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
+rm -f "$RECEIPTS/TenderReports/GeorgeStreetTenderReport.php"
+ln -s "$SUPPORT/GeorgeStreetTenderReport.php" "$RECEIPTS/TenderReports/"
 
 
 # create alias to rewrite TM-T88III NVRAM slot 1 with Co-op logo;
