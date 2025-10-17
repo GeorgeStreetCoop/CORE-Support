@@ -151,7 +151,10 @@
 		foreach ($argv as $idx => $arg) {
 			if ($idx == 0 && $arg == $_SERVER['PHP_SELF']) continue;
 
-			parse_str($arg, $arg_parsed);
+			if (in_array($arg, ['xfer_members', 'xfer_products', 'xfer_sales']))
+				$arg_parsed = [$arg, true]; // boolean arg; mere presence = true
+			else
+				parse_str($arg, $arg_parsed);
 			$invoke_params += $arg_parsed;
 		}
 	} // if (count($_POST)) elseif ($_SERVER['argv'])
