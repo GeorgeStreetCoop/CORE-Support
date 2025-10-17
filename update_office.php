@@ -11,16 +11,23 @@
 
 	set_time_limit(60);
 
-	$OFFICE_SERVER_URL_BASE = null;
-	$OFFICE_SERVER = null;
-	$OFFICE_SERVER_USER = null;
-	$OFFICE_SERVER_PW = null;
-	$OFFICE_OP_DBNAME = null;
-	$coop_host = null;
-	$coop_user = null;
-	$coop_pw = null;
-	$coop_member_dbname = null;
-	$coop_products_dbname = null;
+	$allowed_params = [
+		'OFFICE_SERVER_URL_BASE',
+		'OFFICE_SERVER',
+		'OFFICE_SERVER_USER',
+		'OFFICE_SERVER_PW',
+		'OFFICE_OP_DBNAME',
+		'coop_host',
+		'coop_user',
+		'coop_pw',
+		'coop_member_dbname',
+		'coop_product_dbname',
+		'xfer_members',
+		'xfer_products',
+		'xfer_sales',
+		'start_date',
+		'end_date',
+	];
 
 	if ($is_cron) {
 		echo "Running as command line or cron";
@@ -127,34 +134,17 @@
 		flush();
 	}
 
-	$allowed_params = [
-		'OFFICE_SERVER_URL_BASE' => null,
-		'OFFICE_SERVER' => null,
-		'OFFICE_SERVER_USER' => null,
-		'OFFICE_SERVER_PW' => null,
-		'OFFICE_OP_DBNAME' => null,
-		'coop_host' => null,
-		'coop_user' => null,
-		'coop_pw' => null,
-		'coop_member_dbname' => null,
-		'coop_product_dbname' => null,
-		'xfer_members' => null,
-		'xfer_products' => null,
-		'xfer_sales' => null,
-		'start_date' => null,
-		'end_date' => null,
-	];
 	$invoke_params = [];
-	foreach ($allowed_params as $param => $__) {
+
+	// populate params from Unix environment
+	foreach ($allowed_params as $param) {
 		$value = getenv($param);
 		if ($value !== false)
 			$invoke_params[$param] = $value;
 	}
 
-	if ($_POST) {
-		$invoke_params = array_merge($invoke_params, $_POST);
-	}
-	elseif (isset($_SERVER['argv'])) {
+	// populate params (overriding) from Unix command line
+	if (isset($_SERVER['argv'])) {
 		foreach ($argv as $idx => $arg) {
 			if ($idx == 0 && $arg == $_SERVER['PHP_SELF']) continue;
 
@@ -164,9 +154,14 @@
 				parse_str($arg, $arg_parsed);
 			$invoke_params = array_merge($invoke_params, $arg_parsed);
 		}
-	} // if ($_POST) elseif (isset($_SERVER['argv']))
+	}
 
-	$invoke_params = array_intersect_key($invoke_params, $allowed_params);
+	// populate params (overriding) from webform
+	if ($_POST) {
+		$invoke_params = array_merge($invoke_params, $_POST);
+	}
+
+	$invoke_params = array_intersect_key($invoke_params, array_flip($allowed_params));
 
 	if ($invoke_params) {
 		extract($invoke_params);
