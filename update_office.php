@@ -651,6 +651,10 @@
 				$date_reported_net[$sale_date] = '$'.number_format($date_reported_net[$sale_date], 2);
 				echo "{$lf}{$sale_date}: {$date_records[$sale_date]} records; {$date_gross[$sale_date]} gross, {$date_net[$sale_date]} net, {$date_reported_gross[$sale_date]} reported gross, {$date_reported_net[$sale_date]} reported net";
 			}
+			$total_gross = '$'.number_format($total_gross, 2);
+			$total_net = '$'.number_format($total_net, 2);
+			$total_reported_gross = '$'.number_format($total_reported_gross, 2);
+			$total_reported_net = '$'.number_format($total_reported_net, 2);
 			echo "{$lf}Total: {$total_records} records; {$total_gross} gross, {$total_net} net, {$total_reported_gross} reported gross, {$total_reported_net} reported net{$lf}";
 
 			echo "{$lf}Saving dated sales data to {$coop_host}:";
