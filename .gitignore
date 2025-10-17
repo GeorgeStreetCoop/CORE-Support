@@ -1,11 +1,6 @@
+**/*.log
 ini.php
 ini-local.php
-office_nightly.log
-php-errors.log
-php-queries.log
-update_sales.sh
-www-access.log
-www-error.log
 /ssddir
 QuickMenus/[0-9].php
 QuickMenus/[0-9][0-9].php
