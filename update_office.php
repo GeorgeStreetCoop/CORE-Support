@@ -127,27 +127,34 @@
 		flush();
 	}
 
-	$allowed_params = array(
-			'OFFICE_SERVER_URL_BASE' => null,
-			'OFFICE_SERVER' => null,
-			'OFFICE_SERVER_USER' => null,
-			'OFFICE_SERVER_PW' => null,
-			'OFFICE_OP_DBNAME' => null,
-			'coop_host' => null,
-			'coop_user' => null,
-			'coop_pw' => null,
-			'coop_member_dbname' => null,
-			'coop_product_dbname' => null,
-			'xfer_members' => null,
-			'xfer_products' => null,
-			'xfer_sales' => null,
-			'start_date' => null,
-			'end_date' => null,
-		);
-	if (count($_POST))
-		$invoke_params = $_POST;
-	elseif ($_SERVER['argv']) {
-		$invoke_params = $arg_parsed = [];
+	$allowed_params = [
+		'OFFICE_SERVER_URL_BASE' => null,
+		'OFFICE_SERVER' => null,
+		'OFFICE_SERVER_USER' => null,
+		'OFFICE_SERVER_PW' => null,
+		'OFFICE_OP_DBNAME' => null,
+		'coop_host' => null,
+		'coop_user' => null,
+		'coop_pw' => null,
+		'coop_member_dbname' => null,
+		'coop_product_dbname' => null,
+		'xfer_members' => null,
+		'xfer_products' => null,
+		'xfer_sales' => null,
+		'start_date' => null,
+		'end_date' => null,
+	];
+	$invoke_params = [];
+	foreach ($allowed_params as $param => $__) {
+		$value = getenv($param);
+		if ($value !== false)
+			$invoke_params[$param] = $value;
+	}
+
+	if ($_POST) {
+		$invoke_params = array_merge($invoke_params, $_POST);
+	}
+	elseif (isset($_SERVER['argv'])) {
 		foreach ($argv as $idx => $arg) {
 			if ($idx == 0 && $arg == $_SERVER['PHP_SELF']) continue;
 
@@ -155,12 +162,13 @@
 				$arg_parsed[$arg] = true; // boolean arg; mere presence = true
 			else
 				parse_str($arg, $arg_parsed);
-			$invoke_params += $arg_parsed;
+			$invoke_params = array_merge($invoke_params, $arg_parsed);
 		}
-	} // if (count($_POST)) elseif ($_SERVER['argv'])
+	} // if ($_POST) elseif (isset($_SERVER['argv']))
 
-	if (isset($invoke_params)) {
-		$invoke_params = array_intersect_key($invoke_params, $allowed_params);
+	$invoke_params = array_intersect_key($invoke_params, $allowed_params);
+
+	if ($invoke_params) {
 		extract($invoke_params);
 
 
@@ -748,7 +756,7 @@
 				flush();
 			} // for ($i = 1; $i <= 3; $i++) // iterate lanes
 		} // if ($xfer_members || $xfer_products)
-	} // if (isset($invoke_params))
+	} // if ($invoke_params)
 
 	if ($is_cron) {
 		echo $lf.$lf;
