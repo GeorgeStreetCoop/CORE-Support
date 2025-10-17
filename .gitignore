@@ -1,6 +1,7 @@
 **/*.log
 ini.php
 ini-local.php
+update_sales.sh
 /ssddir
 QuickMenus/[0-9].php
 QuickMenus/[0-9][0-9].php
