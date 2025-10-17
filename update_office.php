@@ -66,7 +66,7 @@
 			</tr>
 			<tr>
 				<td>Password</td>
-				<td><?=installTextField('OFFICE_SERVER_PW', $OFFICE_SERVER_PW, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('OFFICE_SERVER_PW', $OFFICE_SERVER_PW, '', true, ['type'=>'password'])?></td>
 			</tr>
 			<tr>
 				<td>Database</td>
@@ -92,7 +92,7 @@
 			</tr>
 			<tr>
 				<td>Password</td>
-				<td><?=installTextField('coop_pw', $coop_pw, '', true, array('type'=>'password'))?></td>
+				<td><?=installTextField('coop_pw', $coop_pw, '', true, ['type'=>'password'])?></td>
 			</tr>
 			<tr>
 				<td>Member Database</td>
@@ -113,11 +113,11 @@
 			</tr>
 			<tr>
 				<td>Start Date</td>
-				<td><?=installTextField('start_date', $start_date, date('Y-m-d', strtotime($is_cron? '-2 day' : '-21 day')), array('type'=>'date'))?><!-- <small><i>(this date will be included)</i></small>--></td>
+				<td><?=installTextField('start_date', $start_date, date('Y-m-d', strtotime($is_cron? '-2 day' : '-21 day')), ['type'=>'date'])?><!-- <small><i>(this date will be included)</i></small>--></td>
 			</tr>
 			<tr>
 				<td>End Date</td>
-				<td><?=installTextField('end_date', $end_date, date('Y-m-d'), array('type'=>'date'))?><!-- <small><i>(this date will <u>not</u> be included)</i></small>--></td>
+				<td><?=installTextField('end_date', $end_date, date('Y-m-d'), ['type'=>'date'])?><!-- <small><i>(this date will <u>not</u> be included)</i></small>--></td>
 			</tr>
 		</table>
 
@@ -179,7 +179,7 @@
 			echo "Connecting with {$OFFICE_SERVER} `{$OFFICE_OP_DBNAME}`";
 			$office_dsn = "mysql:dbname={$OFFICE_OP_DBNAME};host={$OFFICE_SERVER};charset=utf8";
 			try {
-				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 10));
+				$office_db = new PDO($office_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, [PDO::ATTR_TIMEOUT => 10]);
 				$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 				echo ' — success!';
 			} catch (PDOException $e) {
@@ -253,15 +253,15 @@
 							LastChange = :modified
 					');
 
-				$office_custdata_paramlist = array(
-						':card_no' => 0,
-						':discount' => 0,
-						':is_staff' => 0,
-						':is_senior' => 0,
-						':last_name' => 0,
-						':first_name' => 0,
-						':modified' => 0,
-					);
+				$office_custdata_paramlist = [
+					':card_no' => 0,
+					':discount' => 0,
+					':is_staff' => 0,
+					':is_senior' => 0,
+					':last_name' => 0,
+					':first_name' => 0,
+					':modified' => 0,
+				];
 				$office_meminfo_q = $office_db->prepare('
 						INSERT meminfo
 						SET
@@ -288,19 +288,19 @@
 							ads_OK = :ads_OK,
 							modified = :modified
 					');
-				$office_meminfo_paramlist = array(
-						':card_no' => 0,
-						':last_name' => 0,
-						':first_name' => 0,
-						':street' => 0,
-						':city' => 0,
-						':state' => 0,
-						':zip' => 0,
-						':phone' => 0,
-						':email_1' => 0,
-						':ads_OK' => 0,
-						':modified' => 0,
-					);
+				$office_meminfo_paramlist = [
+					':card_no' => 0,
+					':last_name' => 0,
+					':first_name' => 0,
+					':street' => 0,
+					':city' => 0,
+					':state' => 0,
+					':zip' => 0,
+					':phone' => 0,
+					':email_1' => 0,
+					':ads_OK' => 0,
+					':modified' => 0,
+				];
 				$office_memdates_q = $office_db->prepare('
 						INSERT IGNORE memDates
 						SET
@@ -308,16 +308,16 @@
 							start_date = NULL,
 							end_date = NULL
 					');
-				$office_memdates_paramlist = array(
-						':card_no' => 0,
-					);
+				$office_memdates_paramlist = [
+					':card_no' => 0,
+				];
 
 				flush();
 				foreach ($coop_members as $coop_member) {
 					$coop_member = array_combine($coop_member_keys, $coop_member);
 					set_time_limit(60);
 
-					$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = array();
+					$member_details = $office_custdata_params = $office_meminfo_params = $office_memdates_params = [];
 					foreach ($coop_member as $column => $value) {
 						$member_details[':'.$column] = $value;
 					}
@@ -353,16 +353,16 @@
 				} // foreach ($coop_members as $coop_member)
 
 				// Add non-member POS lookups
-				$office_nonmembers = array(
-						array(':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 111, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => '5% for a Day discount', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => '2016-02-02'),
-						array(':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => '2016-02-02'),
-					);
+				$office_nonmembers = [
+					[':card_no' => 999, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Non-member', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 62, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 1, ':last_name' => 'Senior Non-member', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 33, ':discount' => 67, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Too Good To Go', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 111, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => '5% for a Day discount', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 555, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'New (or newly renewed) member', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 888, ':discount' => 5, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Member of another co-op', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 1766, ':discount' => 15, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => 'Rutgers strike solidarity', ':first_name' => '', ':modified' => '2016-02-02'],
+					[':card_no' => 91111, ':discount' => 0, ':is_staff' => 0, ':is_senior' => 0, ':last_name' => $asof_date, ':first_name' => '', ':modified' => '2016-02-02'],
+				];
 				foreach ($office_nonmembers as $office_nonmember) {
 					if (!($r = $office_custdata_q->execute($office_nonmember)))
 						reportInsertError($office_custdata_q, $office_nonmember);
@@ -375,11 +375,11 @@
 					}
 				} // foreach ($office_nonmembers as $office_nonmember)
 
-				$member_sync_urls = array(
-						'custdata' => 'Synchronize Members to Lanes',
-						'memberCards' => 'Synchronize Member Cards to Lanes',
-						'memtype' => 'Synchronize Member Types to Lanes',
-					);
+				$member_sync_urls = [
+					'custdata' => 'Synchronize Members to Lanes',
+					'memberCards' => 'Synchronize Member Cards to Lanes',
+					'memtype' => 'Synchronize Member Types to Lanes',
+				];
 				foreach ($member_sync_urls as $tablename => $label) {
 					$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
 					if ($sync_lanes) {
@@ -462,9 +462,9 @@
 				echo $lf;
 				flush();
 
-				$product_sync_urls = array(
-						'products' => 'Synchronize Products to Lanes',
-					);
+				$product_sync_urls = [
+					'products' => 'Synchronize Products to Lanes',
+				];
 				foreach ($product_sync_urls as $tablename => $label) {
 					$url = "{$office_server_sync_url_base}?tablename={$tablename}#{$asof_hash}";
 					if ($sync_lanes) {
@@ -714,7 +714,7 @@
 				if ($lane_up && strlen($OFFICE_SERVER_PW)) {
 					$lane_dsn = "mysql:dbname=core_opdata;host={$lane_ip};charset=utf8";
 					try {
-						$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, array(PDO::ATTR_TIMEOUT => 1));
+						$lane_db = new PDO($lane_dsn, $OFFICE_SERVER_USER, $OFFICE_SERVER_PW, [PDO::ATTR_TIMEOUT => 1]);
 						$lane_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 						$lane_login = $lane_db->query('SELECT Cashier, LoggedIn FROM core_opdata.globalvalues')->fetch(PDO::FETCH_ASSOC);
 						if ($lane_login['LoggedIn']) {
@@ -762,7 +762,7 @@
 	}
 
 
-function installTextField($name, &$current_val, $default='', $bool=false, $html_vals=array())
+function installTextField($name, &$current_val, $default='', $bool=false, $html_vals=[])
 {
 	static $ini;
 	if (!isset($ini)) {
@@ -771,7 +771,7 @@ function installTextField($name, &$current_val, $default='', $bool=false, $html_
 			$ini = parse_ini_file('/etc/gsc_pos.ini');
 		}
 		else {
-			$ini = array();
+			$ini = [];
 		}
 	}
 
@@ -814,24 +814,24 @@ function reportInsertError($query, $params)
 
 function textASCII($text_utf8)
 {
-	static $map_alphabetics = array(
-			'a' => 'áâåäāà',
-			'c' => 'çćč',
-			'd' => 'ď',
-			'e' => 'éêëèě',
-			'i' => 'íîï',
-			'n' => 'ñň',
-			'o' => 'óôøöō',
-			'r' => 'ř',
-			's' => 'š',
-			't' => 'ť',
-			'u' => 'úûüùů',
-			'y' => 'ý',
-			'z' => 'ž',
-			'2' => '₂', // used for CO₂
-			"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
-			'"' => '“”″',
-		);
+	static $map_alphabetics = [
+		'a' => 'áâåäāà',
+		'c' => 'çćč',
+		'd' => 'ď',
+		'e' => 'éêëèě',
+		'i' => 'íîï',
+		'n' => 'ñň',
+		'o' => 'óôøöō',
+		'r' => 'ř',
+		's' => 'š',
+		't' => 'ť',
+		'u' => 'úûüùů',
+		'y' => 'ý',
+		'z' => 'ž',
+		'2' => '₂', // used for CO₂
+		"'" => '‘’′', // these may disappear anyway due to CORE-POS filtering apostrophes
+		'"' => '“”″',
+	];
 	static $map;
 
 	if (empty($map)) {
