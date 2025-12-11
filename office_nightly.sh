@@ -1,3 +1,6 @@
+#!/usr/bin/sh
+
+
 # generally install this as an after-midnight cron task on the office backend server
 # do NOT run this on the lanes!
 
@@ -18,7 +21,22 @@
 
 
 echo "Running CORE-POS office backend tasks..."
+
+
+# use PHP 7.x if at all possible
+if [ -x /usr/bin/php7.2 ]; then
+	alias php=/usr/bin/php7.2
+elif [ -x /usr/bin/php7.1 ]; then
+	alias php=//usr/bin/php7.1
+elif [ -x /usr/bin/php7.0 ]; then
+	alias php=/usr/bin/php7.0
+else
+	echo "PHP 7.x couldn't be found in /usr/bin! This may not work..."
+fi
+alias php
+php -v | head -1
 echo
+
 
 # products -> productBackup; custdata -> custdataBackup
 php ../CORE-POS/fannie/classlib2.0/FannieTask.php TableSnapshotTask
