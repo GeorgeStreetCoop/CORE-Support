@@ -122,10 +122,14 @@ class InventoryUpdateGSC extends Plugin
 		logToFile($url_query);
 
 		if ($has_records) {
+			if (function_exists('stream_context_create'))
+				$timeout = stream_context_create(['http' => ['timeout' => 5]]);
+			else
+				$timeout = null; // suffer without timeout
 
 			if ($primary_url) {
 				logToFile("\nSending inventory update request to primary update server:");
-				$primary_result = file_get_contents($primary_url . $url_query);
+				$primary_result = file_get_contents($primary_url . $url_query, false, $timeout);
 				if (is_string($primary_result))
 					$primary_result = preg_replace('~^~m', '  |  ', $primary_result);
 				logToFile($primary_result);
@@ -138,7 +142,7 @@ class InventoryUpdateGSC extends Plugin
 			if (!$primary_result) {
 				if ($secondary_url) {
 					logToFile("\nPrimary update server update failed. Trying now with secondary update server:");
-					$secondary_result = file_get_contents($secondary_url . $url_query);
+					$secondary_result = file_get_contents($secondary_url . $url_query, false, $timeout);
 					if (is_string($secondary_result))
 						$secondary_result = preg_replace('~^~m', '  |  ', $secondary_result);
 					logToFile($secondary_result);
