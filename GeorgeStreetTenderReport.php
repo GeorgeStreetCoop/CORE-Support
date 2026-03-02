@@ -1,7 +1,7 @@
 <?php
 /*******************************************************************************
 
-    Copyright 2016, 2018 George Street Co-op
+    Copyright 2016, 2018, 2026 George Street Co-op
 
     This file is part of IT CORE.
 
@@ -163,6 +163,7 @@ static public function get($session)
 							AND d.department != 0
 							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY t.dept_no
+						ORDER BY t.dept_no
 					",
 			'tax' => "
 						SELECT
@@ -178,6 +179,7 @@ static public function get($session)
 							AND d.trans_type = 'A' AND d.upc = 'TAX'
 							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY (total = 0)
+						ORDER BY GroupLabel
 					",
 			'discount' => "
 						SELECT
@@ -193,6 +195,7 @@ static public function get($session)
 							AND d.trans_type = 'S' AND d.upc = 'DISCOUNT'
 							AND d.datetime BETWEEN CURDATE() AND CURDATE() + INTERVAL 1 DAY
 						GROUP BY percentDiscount
+						ORDER BY percentDiscount
 					",
 			'tender' => "
 						SELECT
