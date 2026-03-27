@@ -257,9 +257,13 @@ static public function get($session)
 			$group_value = number_format($group_value, 2);
 
 			$receipt .= ReceiptLib::boldFont();
-			$receipt .= "{$group_label}: ";
+			$receipt .= $group_label;
 			$receipt .= ReceiptLib::normalFont();
-			$receipt .= "\${$group_value} from {$group_quantity} {$group_quantity_label}".($group_quantity==1?'':'s')."\n";
+			$receipt .= ': ';
+			$receipt .= ReceiptLib::boldFont();
+			$receipt .= '$'.$group_value;
+			$receipt .= ReceiptLib::normalFont();
+			$receipt .= " from {$group_quantity} {$group_quantity_label}".($group_quantity==1?'':'s')."\n";
 		}
 		if ($is_office_query)
 			$total_values[$report] = $total_value;
