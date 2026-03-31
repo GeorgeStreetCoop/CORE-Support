@@ -112,6 +112,7 @@ h3	{
 						AND d.department != 0
 					GROUP BY TransDate, t.dept_no
 					HAVING TransDate = :trans_date
+					ORDER BY TransDate, t.dept_no
 				",
 		'tax' => "
 					SELECT
@@ -127,6 +128,7 @@ h3	{
 						AND d.trans_type = 'A' AND d.upc = 'TAX'
 					GROUP BY TransDate, (total = 0)
 					HAVING TransDate = :trans_date
+					ORDER BY TransDate, GroupLabel
 				",
 		'discount' => "
 					SELECT
@@ -142,6 +144,7 @@ h3	{
 						AND d.trans_type = 'S' AND d.upc = 'DISCOUNT'
 					GROUP BY TransDate, percentDiscount
 					HAVING TransDate = :trans_date
+					ORDER BY TransDate, percentDiscount
 				",
 		'tender' => "
 					SELECT
