@@ -1,4 +1,5 @@
 <?php
+	$host = $username = $trans_database = $trans_table = $op_database = $startdate = $enddate = '';
 	extract($_POST);
 ?>
 <html>
@@ -88,12 +89,18 @@ h3	{
 	ini_set('log_errors', 0);
 	ini_set('error_log', '/dev/null');
 
+	if (!$host || !$username || !$trans_database || !$trans_table || !$op_database || !$startdate || !$enddate) {
+		echo '<i style="color:red">Missing parameters; not attempting connection</i>';
+		return;
+	}
+
 	$office_dsn = "mysql:dbname={$trans_database};host={$host};charset=utf8";
 	try {
 		$office_db = new PDO($office_dsn, $username, $password);
 		$office_db->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 	} catch (PDOException $e) {
-		echo 'Office connection failed: ' . $e->getMessage();
+		echo '<i style="color:red">Office connection failed: <code>'.htmlspecialchars($e->getMessage()).'</code>; not attempting retrieval</i>';
+		return;
 	}
 
 	$report_params = array(
@@ -243,4 +250,3 @@ h3	{
 		echo "<hr>\n";
 	}
 	echo $receipt;
-
