@@ -71,7 +71,7 @@ static public function get($session)
 						'transaction' GroupQuantityLabel,
 						-SUM(d.total) GroupValue
 					FROM {$transarchive} d
-						LEFT JOIN {$opdata_dbname}.tenders t ON d.trans_subtype = t.TenderCode
+						LEFT JOIN {$opdata_dbname}.tenders t ON t.TenderCode = IF(d.description = 'Cash Back', 'CA', d.trans_subtype)
 					WHERE d.emp_no != 9999 AND d.register_no != 99
 						AND d.trans_status != 'X'
 						AND d.trans_type = 'T'
@@ -206,7 +206,7 @@ static public function get($session)
 							'transaction' GroupQuantityLabel,
 							-SUM(d.total) GroupValue
 						FROM {$transarchive} d
-							LEFT JOIN {$opdata_dbname}.tenders t ON d.trans_subtype = t.TenderCode
+							LEFT JOIN {$opdata_dbname}.tenders t ON t.TenderCode = IF(d.description = 'Cash Back', 'CA', d.trans_subtype)
 						WHERE d.emp_no != 9999 AND d.register_no != 99
 							AND d.trans_status != 'X'
 							AND d.trans_type = 'T'
